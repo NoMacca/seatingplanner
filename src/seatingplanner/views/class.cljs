@@ -2,6 +2,7 @@
   (:require
    [cljs.pprint :as pp]
    [re-frame.core :as re-frame]
+   [fontawesome.icons :as icons]
    [reagent.core :as reagent]
    [reitit.frontend.easy :as rtfe]
    [seatingplanner.views.editor :as editor]
@@ -12,30 +13,36 @@
    ;; [seatingplanner.toolsview :as vt]
 ))
 
-
-
-
 ;;==============================
 ;;STUDENTS =====================
 ;;==============================
 (defn student-list [class-id student]
-  [:li [:span.tag student [:button.delete.is-small
-                           {:on-click
-                            #(re-frame/dispatch [:delete-student class-id student])
-                            }
-                           ] ]]
+  [:li [:div.flex.p-2.hover:bg-gray-100
+        [:p student ]
+        [:div.flex-grow]
+        [:button.delete.is-small
+         {:on-click
+          #(re-frame/dispatch [:delete-student class-id student])
+          }
+         ]]]
   )
 
 (defn students [class-id class]
   [:<>
-   [:p.font-bold (str "Students (" (str (count (:students class)))")")]
-   [:label
-    [:ul
+
+[:div.flex.bg-gray-100
+   [:p.text-lg (str "Students (" (str (count (:students class)))")")]
+    [:div.flex-grow]
+    [:button.button.rounded-full
+     {:on-click #(re-frame/dispatch [:toggle-add-student-form-status])
+      }
+     (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})
+
+    ]]
+    [:ul.menu-list
      (for [student  (:students class)]
-       ^{:key student} [student-list class-id student])]]]
+       ^{:key student} [student-list class-id student])]]
   )
-
-
 ;;==============================
 ;;CONSTRAINTS ==================
 ;;==============================
@@ -85,6 +92,21 @@
 
 
 
+
+
+
+(defn classes-list []
+  (let [classes @(re-frame/subscribe [:classes])]
+[:p "Classes"]
+
+
+         ;; (for [[class-id class] classes]
+         ;;   ^{:key class-id} [class-layout class-id class])]
+    (str classes)
+    ))
+
+
+
 (defn layout-classes [class-id class]
   (let [
         full-screen @(re-frame/subscribe [:full-screen])
@@ -96,85 +118,106 @@
         seating-plan (get seating-plans active-class-seating-plan-id)
         name (:name seating-plan)
         ]
-
     [:<>
-(if full-screen
-     [:div;;.card
-      {:style {:display "grid"
-               :grid-template-columns (str "1fr 6fr 1fr")
-               ;; :grid-template-rows (str "repeat(2, 1fr)")
-               ;; :border "solid"
-               }}
-
-      ;;LAYOUT NAME
-
-      [:div.col-span-full.text-center ;;.card
-       [:p.font-bold.text-xl (str (:name class) ": "name)]
-       ]
-      ;; LAYOUT AND CONSTRAINTS
-      [:div;;.card
-       [:div.px-2
-        ;;TODO change here
-        ;; [:div (str class-seating-plan-ids)]
-        ;; [:div (str seating-plans)]
-        ;; [:div (str class-seating-plan-ids)]
-        ;; [:div (str active-class-seating-plans)]
-        ;; [:div (str (vec (map #(:id %) class-seating-plan-ids)))]
-        [:div.py [editor/layout-dropdown class-id active-class-seating-plan-id active-class-seating-plans]]
-        [:div [:button.button.w-full
-               {:on-click #(re-frame/dispatch [:toggle-add-layout-form-status])}
-               "New Seating Plan"]]
-        [form/add-layout class-id]
-
-        [constraints class-id class]
-        ;;TODO add ability to add constriains here
-        [:div.py-1 [:button.button.w-full
-          {:on-click #(re-frame/dispatch [:toggle-add-constraint-form-status])
-           } "Add"]]
-        [form/add-constraint class-id (:students class)]
-        ]]
-
-      ;;EDITOR
-      [:div;;.card
-       [editor/editor [:seating-plans, active-class-seating-plan-id, :layout] seating-plan]]
-
-      ;;STUDENT AND ALLOCATE
-      [:div;;.card
-
-      [:div.px-2 [:button.button
-              {:on-click #(re-frame/dispatch [:full-screen-toggle])}
-                  "Full Screen"]]
-       [:div.px-2 [students class-id class]
-        [:button.button.w-full
-         {:on-click #(re-frame/dispatch [:toggle-add-student-form-status])
-
-          ;; (js/alert "add students")
-          }
-         "Add"]
-        [form/add-student class-id]
-        [:div [:p.font-bold "Allocate"]]
-        [:div.py-1 [:button.button.w-full.bg-red-500.py-1
-                    {:on-click #(re-frame/dispatch [:organise class-id active-class-seating-plan-id])}
-                    "Allocate"]]
-
-        ]]
+     (if full-screen
+       [:div ;;.card
+        {:style {:display "grid"
+                 :grid-template-columns (str "1fr 6fr")
+                 ;; :grid-template-rows (str "repeat(2, 1fr)")
+                 ;; :border "solid"
+                 }}
+        ;;Navigation Menue
+        [:aside.menu.p-4
 
 
-      ]
-     [:div.card
-      [:div.card-content
-       [editor/layout-display [:seating-plans, active-class-seating-plan-id, :layout] (:layout seating-plan)]
-       [:div [:button.button
-              {:on-click #(re-frame/dispatch [:full-screen-toggle])}
-              "Back"]]
-       ]]
 
-     )
+         ;;CLASSES
+         [classes-list]
+
+         ;;STUDENT AND ALLOCATE
+         ;; LAYOUT AND CONSTRAINTS
+
+
+         ;;LAYOUT NAME
+         [:p.font-bold.text-xl
+          (str (:name class))]
+         [students class-id class]
+
+         [form/add-student class-id]
+
+
+         ;; LAYOUT AND CONSTRAINTS
+
+         [:div.py [editor/layout-dropdown class-id active-class-seating-plan-id active-class-seating-plans]]
+
+
+         [:div [:button.button.w-full
+                {:on-click #(re-frame/dispatch [:toggle-add-layout-form-status])}
+                "New Seating Plan"]]
+
+
+         [form/add-layout class-id]
+
+         [constraints class-id class]
+         ;;TODO add ability to add constriains here
+         [:div.py-1 [:button.button.w-full
+                     {:on-click #(re-frame/dispatch [:toggle-add-constraint-form-status])
+                      } "Add"]]
+         [form/add-constraint class-id (:students class)]
+
+         ]
+        ;;EDITOR
+        [:div ;;.card
+         [editor/complete-editor [:seating-plans, active-class-seating-plan-id, :layout] seating-plan
+          class-id active-class-seating-plan-id
+          ]]
+
+
+
+        ]
+
+
+
+
+
+       [:div.card
+        [:div.card-header
+
+         [:div.card-header-title name]
+
+         [:div.card-header-icon
+          [:div.px-2
+           [:button.button.is-white
+            {:on-click #(re-frame/dispatch [:full-screen-toggle])}
+            (icons/render (icons/icon :fontawesome.solid/minimize) {:size 20})]
+           ]]]
+        [:div.card-content
+         [editor/layout-display [:seating-plans, active-class-seating-plan-id, :layout] (:layout seating-plan)]
+         ]
+
+        ]
+
+
+
+
+       ;; [:div.card
+       ;;  [:div.card-content
+       ;;   [editor/layout-display [:seating-plans, active-class-seating-plan-id, :layout] (:layout seating-plan)]
+       ;;   [:div [:button.button
+       ;;          {:on-click #(re-frame/dispatch [:full-screen-toggle])}
+       ;;          "Back"]]
+       ;;   ]]
+
+
+
+
+
+
+       )
      ]
 
 
-    )
-  )
+    ))
 
 
 

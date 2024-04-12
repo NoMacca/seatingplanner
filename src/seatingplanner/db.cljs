@@ -10,7 +10,7 @@
 (def default-db
 
   {
-   :full-screen false
+   :full-screen true
    :forms {
            :add-class false
            :add-student false

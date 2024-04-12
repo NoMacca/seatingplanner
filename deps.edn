@@ -26,6 +26,7 @@
 
            ;; reagent/reagent           {:mvn/version "1.1.1"},
            ;; re-frame/re-frame         {:mvn/version "1.4.2"},
+           no.cjohansen/fontawesome-clj {:mvn/version "2024.01.22"},
 
            fork/fork                 {:mvn/version "2.4.3"},
            ns-tracker/ns-tracker     {:mvn/version "0.4.0"},
