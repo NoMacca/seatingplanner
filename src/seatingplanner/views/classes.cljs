@@ -8,6 +8,7 @@
    [seatingplanner.helpers :as h]
    [seatingplanner.views.forms :as form]
    [fork.bulma :as bulma]
+   [fontawesome.icons :as icons]
    [seatingplanner.stylesgarden :as gstyle]
    [seatingplanner.toolsview :as vt]))
 
@@ -33,8 +34,8 @@
        [:table.table ;;.is-bordered
         [:thead
          [:tr
-          [:td "Name"]
-          [:td "Numer of Students"]
+          [:td [:p.font-bold "Classes"]]
+          [:td [:p.font-bold"Numer of Students"]]
           [:td ""]
           ]]
         [:tbody
@@ -42,17 +43,20 @@
            ^{:key class-id} [class-layout class-id class])]
         ]
        [:div.grid.grid-cols-3
-        [:button.button.is-primary {:on-click #(re-frame/dispatch [:toggle-add-class-form-status])} "Add"]]
+        [:button.button {:on-click #(re-frame/dispatch [:toggle-add-class-form-status])}
+         ;; "Add"
+          (icons/render (icons/icon :fontawesome.solid/plus) {:size 20})
+         ]]
        ]
 
       [:div.grid.rounded-xl.shadow-lg.items-center.p-6.m-4
-        [:button.button.is-primary {:on-click #(re-frame/dispatch [:toggle-add-class-form-status])} "Add a Class"]]
+        [:button.button {:on-click #(re-frame/dispatch [:toggle-add-class-form-status])} "Add a Class"]]
 
       )))
 
 (defn main []
   [:<>
-   [:div [:h1.text-xl.text-center "Classes"]]
+   ;; [:div [:h1.text-xl.text-center "Classes"]]
    [classes]
    [form/add-class]
    ]

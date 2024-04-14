@@ -60,7 +60,7 @@
           [:footer.modal-card-foot
            [:div.buttons {:class "buttons"}
             [:button.button.is-success {:type "submit"
-                                        } "Add"]
+                                        } "Create"]
             [:button.button {:class "button"
                              :on-click #(do
                                           (re-frame/dispatch [:toggle-add-class-form-status])
@@ -73,13 +73,13 @@
 ;;==============================
 ;; ADD STUDENT =================
 ;;==============================
-(defn add-student [class-id]
+(defn add-student [class-id active-class-seating-plan-id]
   (let [status @(re-frame/subscribe [:add-student-form-status])]
     [fork/form {:path [:forms-add-student]
                 :form-id "add-student"
                 :prevent-default? true
                 :clean-on-unmount? true
-                :on-submit #(re-frame/dispatch [:add-student class-id %])
+                :on-submit #(re-frame/dispatch [:add-student class-id active-class-seating-plan-id %])
                 }
      (fn [{:keys [values
                   form-id
@@ -212,8 +212,8 @@
 (defn add-layout [class-id]
   (let [status @(re-frame/subscribe [:add-layout-form-status])
         rooms @(re-frame/subscribe [:rooms])
-        rooms-options (vec ;;(concat '({"" "Please select"})
-                               (map #(hash-map (first %) (:name (second %))) rooms)) ;;)
+        rooms-options (vec (concat '({"" "Please select"})
+                               (map #(hash-map (first %) (:name (second %))) rooms)) )
                        ]
     ;; (js/alert rooms-options)
     [fork/form {:path [:forms-add-layout]
@@ -357,6 +357,64 @@
             [:button.button {:class "button"
                              :on-click #(do
                                           (re-frame/dispatch [:toggle-add-room-form-status])
+                                          (.preventDefault %))}
+             "Cancel"]
+            ]]]]])]))
+
+;;==============================
+;; COPY ROOM ====================
+;;==============================
+(defn copy-room []
+  (let [status @(re-frame/subscribe [:copy-room-form-status])
+        room-id @(re-frame/subscribe [:room-id])
+        ]
+
+    [fork/form {:path [:forms]
+                :form-id "form-id"
+                :prevent-default? true
+                :clean-on-unmount? true
+                :on-submit #(re-frame/dispatch [:copy-room % room-id])
+                }
+     (fn [{:keys [values
+                  form-id
+                  handle-change
+                  handle-blur
+                  handle-submit] :as props}]
+
+       [:form
+        {:id form-id
+         :on-submit handle-submit}
+
+        [:div.modal {:class (str (if status "is-active" ""))
+                     }
+         [:div.modal-background]
+         [:div.modal-card
+          [:header.modal-card-head
+           [:p.modal-card-title "Add room"]
+           [:button.delete {:aria-label "close"
+                            :on-click #(do
+                                         (re-frame/dispatch [:toggle-copy-room-form-status])
+                                         (.preventDefault %)
+                                         )}]]
+          [:section.modal-card-body
+
+           [bulma/input props
+            {:name "input"
+             :label "Room Name"
+             :type "text"
+             :class ""}]
+
+
+            ]
+
+
+          [:footer.modal-card-foot
+           [:div.buttons {:class "buttons"}
+            [:button.button.is-success {:type "submit"
+                                        } "Add"]
+            [:button.button {:class "button"
+                             :on-click #(do
+                                          (re-frame/dispatch [:toggle-copy-room-form-status])
                                           (.preventDefault %))}
              "Cancel"]
             ]]]]])]))

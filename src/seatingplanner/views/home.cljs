@@ -13,19 +13,25 @@
   [:<>
    [:div.container
     [:div.columns.is-centered.is-vcentered
-     [:div.column.is-half
+     [:div.column
       [:div.box.has-text-centered
-       [:h1.title.has-text-primary
+       [:h1.title
         "Welcome to Your Seating Planner"]
        [:p.subtitle
         "Empowering you to create and manage your classroom seating plans."]
        [:div.buttons.is-centered
-        [:a.button.is-primary.is-medium
+        [:a.button.is-medium
          {:href (rtfe/href :routes/#rooms)}
-         "Create Your Rooms"]
-        [:a.button.is-primary.is-medium
+         "1. Create Your Rooms"]
+        [:a.button.is-medium
          {:href (rtfe/href :routes/#classes)}
-         "Create Your Classes"]]]]]]
+         "2. Create Your Classes"]
+        [:a.button.is-medium
+         {:href (rtfe/href :routes/#class)}
+         "3. Create Your Seating Plans"]
+        ]
+
+       ]]]]
    ]
   )
 ;; ROUTING
@@ -35,7 +41,7 @@
    ["Rooms"    :routes/#rooms]
    ;; ["Room"    :routes/#room]
    ["Classes" :routes/#classes]
-   ;; ["Class" :routes/#class]
+   ["Editor" :routes/#class]
    ])
 
 (defn route-info [route]

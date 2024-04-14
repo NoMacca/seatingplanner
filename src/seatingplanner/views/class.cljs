@@ -17,37 +17,31 @@
 ;;STUDENTS =====================
 ;;==============================
 (defn student-list [class-id student]
-  [:li [:div.flex.p-2.hover:bg-gray-100
+  [:li [:div.flex.p-2.hover:bg-blue-500
         [:p student ]
         [:div.flex-grow]
-        [:button.delete.is-small
+        [:button.delete.is-small;;.invisible.hover:visible
          {:on-click
           #(re-frame/dispatch [:delete-student class-id student])
           }
          ]]]
   )
 
-(defn students [class-id class]
+(defn students [class-id class active-class-seating-plan-id]
   [:<>
-
-[:div.flex.bg-gray-100
-   [:p.text-lg (str "Students (" (str (count (:students class)))")")]
-    [:div.flex-grow]
-    [:button.button.rounded-full
-     {:on-click #(re-frame/dispatch [:toggle-add-student-form-status])
-      }
-     (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})
-
-    ]]
-    [:ul.menu-list
+   [:p.menu-label (str "Students (" (str (count (:students class)))")")]
+   [:ul.menu-list
      (for [student  (:students class)]
-       ^{:key student} [student-list class-id student])]]
+       ^{:key student} [student-list class-id student])]
+   [:button.button.rounded-full
+    {:on-click #(re-frame/dispatch [:toggle-add-student-form-status])}
+    (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]
+   [form/add-student class-id active-class-seating-plan-id]
+   ]
   )
 ;;==============================
 ;;CONSTRAINTS ==================
 ;;==============================
-;;
-
 (defn constraint->string [input]
   (let [[directive name1 name2 distance] input
         result (if (= directive :non-adjacent)
@@ -56,19 +50,27 @@
     result))
 
 (defn constraints-list [class-id constraint]
-  [:li [:span.tag (constraint->string constraint) [:button.delete.is-small
-                           {:on-click
-                            #(re-frame/dispatch [:delete-constraint class-id constraint])
-                            }
-]]])
+  [:li [:div.flex.p-2.hover:bg-blue-500
+        [:p(constraint->string constraint)]
+        [:div.flex-grow]
+         [:button.delete.is-small
+          {:on-click
+           #(re-frame/dispatch [:delete-constraint class-id constraint])
+           }
+          ]]])
 
 (defn constraints [class-id class]
   [:<>
-   [:p.font-bold "Constraints"]
-   [:label
-    [:ul
+   [:p.menu-label "Constraints"]
+    [:ul.menu-list
      (for [constraint  (:constraints class)]
-       ^{:key constraint} [constraints-list class-id constraint])]]]
+       ^{:key constraint} [constraints-list class-id constraint])]
+
+  [:div.py-1 [:button.button.rounded-full
+              {:on-click #(re-frame/dispatch [:toggle-add-constraint-form-status])}
+              (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]]
+
+   ]
   )
 
 
@@ -83,28 +85,60 @@
        first))
 
 
-(def data
-  {1 {:name "C4 Computer Lap", :layout [[nil :student nil] [:student :student nil] [nil nil "Jack"] [:desk nil :student]]}
-   2 {:name "B2 Science Lap", :layout [["Sallly" :student nil] [:student :student nil] [nil nil "Jack"] [:desk nil :student]]}
-   3 {:name "Hellow", :layout [[:person nil "Sally"] [nil :desk "Noah"] ["John" "James" nil]]}})
+;; (def data
+;;   {1 {:name "C4 Computer Lap", :layout [[nil :student nil] [:student :student nil] [nil nil "Jack"] [:desk nil :student]]}
+;;    2 {:name "B2 Science Lap", :layout [["Sallly" :student nil] [:student :student nil] [nil nil "Jack"] [:desk nil :student]]}
+;;    3 {:name "Hellow", :layout [[:person nil "Sally"] [nil :desk "Noah"] ["John" "James" nil]]}})
 
-  (select-keys data [2 1])
-
-
+;;   (select-keys data [2 1])
 
 
+(defn class-m [class-id {:keys [name students]} active-class-id]
+  [:li [:a {:class (if  (= active-class-id class-id) "is-active" "")
+            :on-click #(re-frame/dispatch [:class-id class-id])
+            }
+        name]]
 
+  )
 
-(defn classes-list []
+(defn classes-list [active-class-id]
   (let [classes @(re-frame/subscribe [:classes])]
-[:p "Classes"]
-
-
-         ;; (for [[class-id class] classes]
-         ;;   ^{:key class-id} [class-layout class-id class])]
-    (str classes)
+    [:div
+     [:p.menu-label "Classes"]
+    [:ol.menu-list
+    (for [[class-id class] classes]
+      ^{:key class-id} [class-m class-id class active-class-id])
+     ]]
     ))
 
+(defn seating-plan-m [seating-plan-id {:keys [name layout]} active-seating-plan-id class-id]
+
+  [:li [:a {:class (if  (= seating-plan-id active-seating-plan-id) "is-active" "")
+            :on-click #(re-frame/dispatch [:change-layout class-id seating-plan-id])
+            }
+        name]]
+
+  )
+
+(defn seatingplans-list [class-id active-seating-plan-id active-class-seating-plans]
+  (let [
+        ;; current-seating-plan (get active-class-seating-plans active-seating-plan-id)
+        ;; seating-plans-rest (dissoc seating-plans active-seating-plan-id)
+        ]
+    [:<>
+     [:p.menu-label "Seating Plans"]
+     [:ol.menu-list
+      (for [[seating-plan-id seating-plan] active-class-seating-plans]
+        ^{:key seating-plan-id} [seating-plan-m seating-plan-id seating-plan active-seating-plan-id class-id])
+      ]
+
+    [:div.py-1 [:button.button.rounded-full
+                {:on-click #(re-frame/dispatch [:toggle-add-layout-form-status])}
+                (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]]
+
+    [form/add-layout class-id]]
+  )
+  )
 
 
 (defn layout-classes [class-id class]
@@ -122,50 +156,28 @@
      (if full-screen
        [:div ;;.card
         {:style {:display "grid"
-                 :grid-template-columns (str "1fr 6fr")
+                 :grid-template-columns (str "1fr 3fr")
                  ;; :grid-template-rows (str "repeat(2, 1fr)")
                  ;; :border "solid"
                  }}
         ;;Navigation Menue
-        [:aside.menu.p-4
-
-
+        [:aside.menu.p-2.border.bg-gray-100
 
          ;;CLASSES
-         [classes-list]
+         [classes-list class-id]
 
-         ;;STUDENT AND ALLOCATE
-         ;; LAYOUT AND CONSTRAINTS
+         ;; LAYOUT
+         [seatingplans-list class-id active-class-seating-plan-id active-class-seating-plans]
 
-
-         ;;LAYOUT NAME
-         [:p.font-bold.text-xl
-          (str (:name class))]
-         [students class-id class]
-
-         [form/add-student class-id]
-
-
-         ;; LAYOUT AND CONSTRAINTS
-
-         [:div.py [editor/layout-dropdown class-id active-class-seating-plan-id active-class-seating-plans]]
-
-
-         [:div [:button.button.w-full
-                {:on-click #(re-frame/dispatch [:toggle-add-layout-form-status])}
-                "New Seating Plan"]]
-
-
-         [form/add-layout class-id]
-
+         ;; CONSTRAINTS
          [constraints class-id class]
-         ;;TODO add ability to add constriains here
-         [:div.py-1 [:button.button.w-full
-                     {:on-click #(re-frame/dispatch [:toggle-add-constraint-form-status])
-                      } "Add"]]
          [form/add-constraint class-id (:students class)]
 
+         ;;STUDENT
+         [students class-id class active-class-seating-plan-id]
+
          ]
+
         ;;EDITOR
         [:div ;;.card
          [editor/complete-editor [:seating-plans, active-class-seating-plan-id, :layout] seating-plan

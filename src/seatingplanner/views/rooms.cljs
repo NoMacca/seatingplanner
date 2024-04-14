@@ -4,6 +4,7 @@
    [re-frame.core :as re-frame]
    [reagent.core :as reagent]
    [reitit.frontend.easy :as rtfe]
+   [fontawesome.icons :as icons]
    [seatingplanner.db :as db]
    [seatingplanner.helpers :as h]
    [seatingplanner.views.forms :as form]
@@ -11,7 +12,6 @@
    [seatingplanner.stylesgarden :as gstyle]
    [seatingplanner.toolsview :as vt]))
 
-;;TODO change here
 (defn room-layout [room-id {:keys [name]}]
   [:tr
    [:td
@@ -21,9 +21,16 @@
       :href (rtfe/href :routes/#room)}
      [:button.text-blue-500.underline.hover:text-blue-700
       name]]]
-   [:td [:button.delete
-         {:on-click #(re-frame/dispatch [:delete-room room-id])}
-         ]]
+   [:td.flex.justify-end.gap-2
+    [:button
+     {:on-click #(re-frame/dispatch [:toggle-on-copy-room-form-status room-id])}
+          (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
+     ]
+
+    [:button.delete
+     {:on-click #(re-frame/dispatch [:delete-room room-id])}
+     ]
+    ]
    ])
 
 (defn rooms []
@@ -34,8 +41,8 @@
        [:table.table ;;.is-bordered
         [:thead
          [:tr
-          [:td "Rooms"]
-          ;; [:td "Numer of Students"]
+          [:td [:p.font-bold"Rooms"]]
+          ;; [:td ""]
           [:td ""]
           ]]
         [:tbody
@@ -43,20 +50,26 @@
            ^{:key room-id} [room-layout room-id room])]
         ]
        [:div.grid.grid-cols-3
-        [:button.button.is-primary {
-                                    :on-click #(re-frame/dispatch [:toggle-add-room-form-status])} "Add"]]
+        [:button.button {
+                                    :on-click #(re-frame/dispatch [:toggle-add-room-form-status])}
+
+          (icons/render (icons/icon :fontawesome.solid/plus) {:size 20})
+         ;; "Add"
+         ]]
        ]
       [:div.grid.rounded-xl.shadow-lg.items-center.p-6.m-4
-       [:button.button.is-primary {
+       [:button.button {
                                    :on-click #(re-frame/dispatch [:toggle-add-room-form-status])} "Add a Room"]]
 
       )))
 
 (defn main []
   [:<>
-   [:div [:h1.text-xl.text-center "Rooms"]]
+   ;; [:div [:h1.text-xl.text-center "Rooms"]]
    [rooms]
-   [form/add-room]]
+   [form/add-room]
+   [form/copy-room]
+   ]
 
 
   )

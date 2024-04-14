@@ -25,3 +25,13 @@ This is a free software project distributed under the terms of the GNU General P
 
 ## Feedback 
 If you use this application, I would be interested in any feedback. 
+
+## TODO
+
+1. CSP algorithm does not work without constraints
+2. CSP algorithm not consistently giving allocations
+2. CSP algorithm says when there is not possible seating arrangement
+3. Drag and drop
+4. SPEC
+5. Local Storage
+6. Edit Class-name

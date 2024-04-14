@@ -18,15 +18,18 @@
 ;; STRING CONVERSIONS
 ;;===============================================
 
-
 (defn clean-values [value]
   (->> (str/split value #"[,\n]")
        (map str/trim)
-       (vec)))
+       (vec)
+       (distinct)
+       ))
+
+
 
 
 (defn remove-item [item items]
- (vec (remove #(= item %) items)))
+  (vec (remove #(= item %) items)))
 ;;==============================================
 ;; ID MANAGEMENT HELPER FUNCTIONS ==============
 ;;==============================================
