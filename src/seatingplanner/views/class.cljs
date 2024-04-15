@@ -16,23 +16,25 @@
 ;;==============================
 ;;STUDENTS =====================
 ;;==============================
-(defn student-list [class-id student]
-  [:li [:div.flex.p-2.hover:bg-blue-500
-        [:p student ]
+(defn student-list [class-id student active-class-seating-plan-id]
+  [:li [:div.flex.p-2.gap-2;;button.hover:bg-blue-500
+        [:p student]
         [:div.flex-grow]
-        [:button.delete.is-small;;.invisible.hover:visible
-         {:on-click
-          #(re-frame/dispatch [:delete-student class-id student])
-          }
-         ]]]
-  )
+        [:button
+         {:title "Add to seating plan"
+          :on-click #(re-frame/dispatch [:student-to-seating-plan student active-class-seating-plan-id])}
+         (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]
+
+        [:button.delete.is-small ;;.order-first;.;.invisible.hover:visible
+         {:on-click #(re-frame/dispatch [:delete-student class-id student])
+          }]]])
 
 (defn students [class-id class active-class-seating-plan-id]
   [:<>
    [:p.menu-label (str "Students (" (str (count (:students class)))")")]
    [:ul.menu-list
      (for [student  (:students class)]
-       ^{:key student} [student-list class-id student])]
+       ^{:key student} [student-list class-id student active-class-seating-plan-id])]
    [:button.button.rounded-full
     {:on-click #(re-frame/dispatch [:toggle-add-student-form-status])}
     (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]
@@ -43,15 +45,20 @@
 ;;CONSTRAINTS ==================
 ;;==============================
 (defn constraint->string [input]
-  (let [[directive name1 name2 distance] input
+  (let [[checked? directive name1 name2 distance] input
         result (if (= directive :non-adjacent)
                  (str name1 " and " name2 " are " distance " spaces apart")
                  (str name1 " and " name2 " are within " distance " spaces"))]
     result))
 
 (defn constraints-list [class-id constraint]
-  [:li [:div.flex.p-2.hover:bg-blue-500
-        [:p(constraint->string constraint)]
+  [:li [:div.flex.p-2;;.hover:bg-blue-500
+        [:p
+        [:input {:type "checkbox"
+                 :checked (first constraint)
+                 :on-change #(re-frame/dispatch [:toggle-constraint class-id constraint])
+                 }]
+        (str " " (constraint->string constraint))]
         [:div.flex-grow]
          [:button.delete.is-small
           {:on-click
@@ -72,7 +79,6 @@
 
    ]
   )
-
 
 ;;==============================
 ;;SEATING PLANS ================
@@ -170,6 +176,7 @@
          [seatingplans-list class-id active-class-seating-plan-id active-class-seating-plans]
 
          ;; CONSTRAINTS
+
          [constraints class-id class]
          [form/add-constraint class-id (:students class)]
 
@@ -177,12 +184,13 @@
          [students class-id class active-class-seating-plan-id]
 
          ]
-
         ;;EDITOR
-        [:div ;;.card
-         [editor/complete-editor [:seating-plans, active-class-seating-plan-id, :layout] seating-plan
-          class-id active-class-seating-plan-id
-          ]]
+        ;; [:p (str "hello " (empty? active-class-seating-plans))]
+        (if (not (empty? active-class-seating-plans)) ;;this there are no seating plan false
+          [:div ;;.card
+           [editor/complete-editor [:seating-plans, active-class-seating-plan-id, :layout] seating-plan
+            class-id active-class-seating-plan-id
+            ]])
 
 
 

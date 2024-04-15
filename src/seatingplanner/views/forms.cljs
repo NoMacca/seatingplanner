@@ -162,21 +162,21 @@
 
            [:div.grid.grid-cols-2 ;;.flex.gap-4.flex-wrap ;;.overflow-auto.gap-4
             [bulma/dropdown props
-             {:label "Student"
+             {:label "Student 1"
               :name "s1"
               :options students
               :class "w-full"
               }]
 
             [bulma/dropdown props
-             {:label "Student"
+             {:label "Student 2"
               :name "s2"
               :options students
               :class "w-full"
               }]
 
             [bulma/dropdown props
-             {:label "Type"
+             {:label "Constraint Type"
               :name "type"
               :options [{"" "Please select"} {:proximity "Together"}
                {:non-adjacent "Apart"}]
@@ -184,7 +184,7 @@
               }]
             [bulma/dropdown props
              {
-              :label "Space"
+              :label "Num of Spaces"
               :name "space"
               :options  (vec (concat '({"" "Please select"})
                                      (for [i (range 1 21)]
@@ -418,3 +418,67 @@
                                           (.preventDefault %))}
              "Cancel"]
             ]]]]])]))
+
+
+
+;;==============================
+;; COPY SEATING PLAN ===========
+;;==============================
+ ;;:toggle-copy-seating-plan-form-status
+(defn copy-seating-plan [class-id active-class-seating-plan-id]
+  (let [
+
+        status @(re-frame/subscribe [:copy-seating-plan-form-status])
+        ;; room-id @(re-frame/subscribe [:room-id])
+        ]
+
+    [fork/form {:path [:forms]
+                :form-id "form-id"
+                :prevent-default? true
+                :clean-on-unmount? true
+                :on-submit #(re-frame/dispatch [:copy-seating-plan % class-id active-class-seating-plan-id])
+                }
+     (fn [{:keys [values
+                  form-id
+                  handle-change
+                  handle-blur
+                  handle-submit] :as props}]
+
+       [:form
+        {:id form-id
+         :on-submit handle-submit}
+
+        [:div.modal {:class (str (if status "is-active" ""))
+                     }
+         [:div.modal-background]
+         [:div.modal-card
+          [:header.modal-card-head
+           [:p.modal-card-title "Copy seating plan"]
+           [:button.delete {:aria-label "close"
+                            :on-click #(do
+                                         (re-frame/dispatch [:toggle-copy-seating-plan-form-status])
+                                         (.preventDefault %)
+                                         )}]]
+          [:section.modal-card-body
+
+           [bulma/input props
+            {:name "name"
+             :label "New seating plan name"
+             :type "text"
+             :class ""}]
+
+
+            ]
+
+
+          [:footer.modal-card-foot
+           [:div.buttons {:class "buttons"}
+            [:button.button.is-success {:type "submit"
+                                        } "Add"]
+            [:button.button {:class "button"
+                             :on-click #(do
+                                          (re-frame/dispatch [:toggle-copy-seating-plan-form-status])
+                                          (.preventDefault %))}
+             "Cancel"]
+            ]]]]])]))
+

@@ -201,11 +201,39 @@
             (assoc-in [:classes class-id :students] (conj students student-name) )
             )}))))
 
- (re-frame/reg-sub
-  :add-student-form-status
-  (fn [db _ ]
-    (get-in db [:forms :add-student])
-    ))
+
+(defn student-not-in-seating-plan? [student seating-plan]
+  (some #(= student %) (flatten seating-plan))
+  )
+
+;;TODO check if student exists on this seating plan
+(re-frame/reg-event-db
+ :student-to-seating-plan
+ (fn [db [_ student-name active-class-seating-plan-id]]
+   (let [seating-plan (get-in db [:seating-plans, active-class-seating-plan-id, :layout])
+
+
+         ]
+     (if (student-not-in-seating-plan? student-name seating-plan)
+       (do
+         (js/alert (str student-name " is already in the seating plan."))
+         db)
+       (assoc-in db [:seating-plans, active-class-seating-plan-id, :layout] (add-new-student student-name seating-plan))
+       )
+)
+   )
+ )
+
+
+;; #(re-frame/dispatch [:student-to-seating-plan student active-class-seating-plan-id])
+
+
+
+(re-frame/reg-sub
+ :add-student-form-status
+ (fn [db _ ]
+   (get-in db [:forms :add-student])
+   ))
 
 (re-frame/reg-event-db
  :toggle-add-student-form-status
@@ -230,6 +258,17 @@
      (assoc-in db [:classes class-id :constraints] new-constraints)
      )))
 
+(re-frame/reg-event-db
+ :toggle-constraint
+ (fn [db [_ class-id [c t s1 s2 d :as constraint]]]
+   (let [
+         constraints (get-in db [:classes class-id :constraints])
+         new-constraint [(not c) t s1 s2 d]
+         new-constraints (map (fn [x] (if (= constraint x) new-constraint x)) constraints)
+         ]
+     (assoc-in db [:classes class-id :constraints] new-constraints))))
+
+
 (re-frame/reg-event-fx
  :add-constraint
  ;; interceptors
@@ -238,9 +277,9 @@
          s2 (get values "s2")
          type (get values "type")
          space (get values "space")
-         new-constraint [(keyword type) s1 s2 (int space)]
+         new-constraint [true (keyword type) s1 s2 (int space)]
          constraints (get-in db [:classes class-id :constraints])]
-       {:db
+     {:db
       (-> db
           (assoc-in [:forms :add-constraint] false)
           (assoc-in [:classes class-id :constraints] (conj constraints new-constraint) )
@@ -266,17 +305,23 @@
 ;;==============================
 ;; LAYOUTS =====================
 ;;==============================
+(def foo '({:id 4, :active false} {:id 2, :active false}))
+(assoc-in (vec foo) [0 :active] true)
+
 
 (re-frame/reg-event-db
  :delete-layout
  ;; interceptors
  (fn [db [_ class-id id]]
    (let [class-seating-plans (get-in db [:classes, class-id, :seating-plans])
-         updated-class-seating-plans (filter #(not= id (:id %)) class-seating-plans)]
-   (-> db
-       (update-in [:seating-plans] dissoc id)
-       (assoc-in [:classes, class-id :seating-plans] updated-class-seating-plans)
-       ))))
+         removed (filter #(not= id (:id %)) class-seating-plans)
+         updated-class-seating-plans (assoc-in (vec removed) [0 :active] true)
+         ]
+     ;; (js/alert (str updated-class-seating-plans))
+     (-> db
+         (update-in [:seating-plans] dissoc id)
+         (assoc-in [:classes, class-id :seating-plans] updated-class-seating-plans)
+         ))))
 
 
 (defn add-id-change-active-status [data new-id]
@@ -340,6 +385,87 @@
     (assoc-in db [:forms :add-layout] (not status)))
    ))
 
+
+
+(re-frame/reg-event-db
+ :toggle-copy-seating-plan-form-status
+ ;; interceptors
+ (fn [db _]
+   (let [status (get-in db [:forms :copy-seating-plan])]
+    (assoc-in db [:forms :copy-seating-plan] (not status)))
+   ))
+
+(re-frame/reg-sub
+ :copy-seating-plan-form-status
+ (fn [db _]
+   (get-in db [:forms :copy-seating-plan])))
+
+
+(re-frame/reg-event-fx
+ :copy-seating-plan
+ interceptors
+ (fn [{db :db} [_ {:keys [values dirty path]} class-id active-class-seating-plan-id]]
+   (let [
+         ;; ADDING TO SEATING PLAN
+
+         ;; room-id (int (get values "room"))
+         seating-plans (:seating-plans db)
+
+         new-seating-plan-id (h/allocate-next-id seating-plans)
+
+
+         new-seating-plan-layout (get-in seating-plans [active-class-seating-plan-id, :layout])
+
+         new-seating-plan-name (get values "name")
+         new-seating-plan {:name new-seating-plan-name, :layout new-seating-plan-layout}
+         ;; ;; ADDING TO CLASS SEATING PLAN
+         class-seating-plans (get-in db [:classes, class-id, :seating-plans])
+         new-class-seating-plans (add-id-change-active-status class-seating-plans new-seating-plan-id)
+         ]
+     {:db
+
+      (-> db
+          (assoc-in [:forms :copy-seating-plan] false)
+          (assoc-in [:classes, class-id, :seating-plans] new-class-seating-plans)
+          (assoc :seating-plans (h/update-item seating-plans new-seating-plan-id new-seating-plan))
+          )}
+     )))
+
+
+(re-frame/reg-event-fx
+ :validate
+ (fn [{db :db} [_ class-id active-class-seating-plan-id]]
+   (let [
+         students (set (get-in db [:classes, class-id, :students]))
+         constraints (get-in db [:classes, class-id, :constraints])
+         seating-plan (get-in db [:seating-plans, active-class-seating-plan-id, :layout])
+
+         students-in-seating-plan (set (filter #(string? %) (flatten seating-plan)))
+         missing (clojure.set/difference students students-in-seating-plan)
+         randoms (clojure.set/difference students-in-seating-plan students)
+         constraints? (h/check-constraints? seating-plan constraints)
+
+         ]
+     (js/alert (str
+                (if (empty? missing)
+                  "All students are in seating plan"
+                  (str "The following students are missing: "  (clojure.string/join ", " missing))
+                  )
+                (if (empty? randoms)
+                  ""
+                  (str "\nStudent in seating plan but no longer part of the class: "  (clojure.string/join ", " randoms))
+                  )
+                (if constraints?
+                  "\nAll the constraints are being met"
+                  "\nOne or more constraints are not being met"
+                  )))
+     {}
+     )
+   )
+ )
+
+
+
 ;;==============================
 ;; FULL SCREEN =================
 ;;==============================
@@ -348,7 +474,7 @@
  ;; interceptors
  (fn [db _ ]
    (assoc db :full-screen (not (:full-screen db))))
-   )
+ )
 
 (re-frame/reg-sub
  :full-screen

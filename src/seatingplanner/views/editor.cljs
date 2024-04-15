@@ -7,6 +7,7 @@
    [seatingplanner.db :as db]
    [seatingplanner.helpers :as h]
    [fork.bulma :as bulma]
+   [seatingplanner.views.forms :as form]
    [fontawesome.icons :as icons]
    [fork.re-frame :as fork]
    [seatingplanner.stylesgarden :as gstyle]
@@ -41,23 +42,42 @@
   (let [a @(re-frame/subscribe [:toggle-spot])]
     [:<>
      [:div.flex.justify-end ;;.bg-gray-200 ;;.space-x-4
-      [:button {:class (str toggle-buttons (if (= :student a) active inactive))
+      [:button {
+                :title "Student space"
+                :class (str toggle-buttons (if (= :student a) active inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot :student])}
 
           (icons/render (icons/icon :fontawesome.solid/person) {:size 20})]
 
-      [:button {:class (str toggle-buttons (if (= :desk a) active inactive))
+      [:button {
+                :title "Desk space"
+                :class (str toggle-buttons (if (= :desk a) active inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot :desk])}
           (icons/render (icons/icon :fontawesome.solid/square) {:size 20})
        ]
-      [:button {:class (str toggle-buttons (if (= nil a) active inactive))
+      [:button {
+                :title "Empty space"
+                :class (str toggle-buttons (if (= nil a) active inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot nil])}
 
           (icons/render (icons/icon :fontawesome.regular/square) {:size 20})
        ]
-      [:button {:class (str toggle-buttons " bg-red-100") :on-click #(re-frame/dispatch [:clear-all path])}
+      ;; [:button {
+      ;;           :title "Undo"
+      ;;           :class (str toggle-buttons " bg-blue-200")
+      ;;           :on-click #(js/alert "add undo functionality")
+      ;;           }
+      ;;     (icons/render (icons/icon :fontawesome.solid/rotate-left) {:size 20})
+      ;;  ]
+      [:button {
+                :title "Clear seating plan"
+                :class (str toggle-buttons " bg-red-100") :on-click #(re-frame/dispatch [:clear-all path])}
           (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
        ]
+
+
+
+
       ]]))
 
 
@@ -225,14 +245,42 @@
 ]
       [:div.card-footer
        ;; [:div.card-footer-item [:p.font-bold "Allocate"]]
-         [:button.card-footer-item
+       [:button.card-footer-item
+        {
+         :title "Allocate students onto the seating plan considering the constraints"
+         :on-click #(re-frame/dispatch [:organise class-id active-class-seating-plan-id])}
+        [:p
+         ;; "Allocate"
+         (icons/render (icons/icon :fontawesome.solid/chair) {:size 20})
+         ]]
+
+       [:button.card-footer-item
+        {:title "Check that all students are on the seating plan"
+         :on-click #(re-frame/dispatch [:validate class-id active-class-seating-plan-id])
+         }
+        (icons/render (icons/icon :fontawesome.solid/check) {:size 20})
+        ]
 
 
-           {:on-click #(re-frame/dispatch [:organise class-id active-class-seating-plan-id])}
-          [:p
-           "Allocate"]]
-         [:button.card-footer-item..bg-red-100.hover:bg-red-500
-                     {:on-click #(re-frame/dispatch [:delete-layout class-id active-class-seating-plan-id])}
-          [:p
-           "Delete"]
-]]]))
+       [:button.card-footer-item
+        {:title "Make a copy of this seating plan"
+         :on-click #(re-frame/dispatch [:toggle-copy-seating-plan-form-status])
+         ;; #(re-frame/dispatch [:copy-seating-plan class-id active-class-seating-plan-id])
+
+         }
+        (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
+        ]
+       [form/copy-seating-plan class-id active-class-seating-plan-id]
+
+
+
+       [:button.card-footer-item..bg-red-100.hover:bg-red-500
+        {
+         :title "Delete this seating plan"
+         :on-click #(re-frame/dispatch [:delete-layout class-id active-class-seating-plan-id])}
+        [:p
+         ;; "Delete"
+         (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
+         ]
+
+        ]]]))

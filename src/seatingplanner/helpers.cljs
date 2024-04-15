@@ -57,64 +57,71 @@
 ;; (def items (create-item items 2 "Data for item 2"))
 ;; (def items (update-item items 2 "Updated data for item 2"))
 
-(sorted-map
-2 "Hellosdf"
- )
+;; (sorted-map
+;; 2 "Hellosdf"
+;;  )
 
 
 
-(def foolasses (sorted-map
-                1 {
-                   :name "Year 7 Digital Technology"
-                   :students ["Sally" "Noah" "John" "James"]
-                   :constraints ["??"]
-                   :seating-plans (sorted-map
-                                   1
-                                   {:name "Hellow"
-                                    :layout [[:person :nil "Sally"]
-                                             [:nil :desk "Noah"]
-                                             ["John" "James" :nil]]}
-                                   )}
+;; (def foolasses (sorted-map
+;;                 1 {
+;;                    :name "Year 7 Digital Technology"
+;;                    :students ["Sally" "Noah" "John" "James"]
+;;                    :constraints ["??"]
+;;                    :seating-plans (sorted-map
+;;                                    1
+;;                                    {:name "Hellow"
+;;                                     :layout [[:person :nil "Sally"]
+;;                                              [:nil :desk "Noah"]
+;;                                              ["John" "James" :nil]]}
+;;                                    )}
 
 
 
 
-                2 {
-                   :name "Year 10 Digital Technology"
-                   :students ["Mally" "Jill" "Eleanor" "Alan"]
-                   :constraints ["??"]
-                   :seating-plans (sorted-map
-                                   1
-                                   {:name "Hellow"
-                                    :layout [[:person :nil "Sally"]
-                                             [:nil :desk "Noah"]
-                                             ["John" "James" :nil]]}
-                                   )}
+;;                 2 {
+;;                    :name "Year 10 Digital Technology"
+;;                    :students ["Mally" "Jill" "Eleanor" "Alan"]
+;;                    :constraints ["??"]
+;;                    :seating-plans (sorted-map
+;;                                    1
+;;                                    {:name "Hellow"
+;;                                     :layout [[:person :nil "Sally"]
+;;                                              [:nil :desk "Noah"]
+;;                                              ["John" "James" :nil]]}
+;;                                    )}
 
 
-                )
-  )
+;;                 )
+;;   )
 
-(for [[class-id class] foolasses
-      ;; [seating-id seating-plan] (:seating-plans class)
+;; (for [[class-id class] foolasses
+;;       ;; [seating-id seating-plan] (:seating-plans class)
 
-      ]
-  ;; (println "Class ID:" class-id)
-  (println "Name:" (str class))
-  ;; (println "Students:" (:students class))
-  ;; (println "Constraints:" (:constraints class))
-  ;; (println "Seating Plan ID:" seating-id)
-  ;; (println "Seating Plan Name:" (:name seating-plan))
-  ;; (println "Seating Plan Layout:" (:layout seating-plan)
+;;       ]
+;;   ;; (println "Class ID:" class-id)
+;;   (println "Name:" (str class))
+;;   ;; (println "Students:" (:students class))
+;;   ;; (println "Constraints:" (:constraints class))
+;;   ;; (println "Seating Plan ID:" seating-id)
+;;   ;; (println "Seating Plan Name:" (:name seating-plan))
+;;   ;; (println "Seating Plan Layout:" (:layout seating-plan)
 
-  ;;          )
+;;   ;;          )
 
-  )
+;;   )
 
 
 ;;==============================================
 ;; CONSTRAINT SATISFACTION PROBLEM =============
 ;;==============================================
+;;
+;;
+;;
+;;
+
+
+
 (defn distance [seat1 seat2]
   (let [[x1 y1] seat1
         [x2 y2] seat2
@@ -122,9 +129,20 @@
         dy (- y2 y1)]
     (Math/sqrt (+ (* dx dx) (* dy dy)))))
 
+(distance [0 0] [1 2])
+(distance [1 2] [0 0])
+
+(distance [0 0] [3 0])
+(distance [3 0] [0 0])
+
+(distance [3 0] [1 2])
+(distance [1 2] [3 0])
+
 (def counter (atom 0))
 
 ;; (empty? #{})
+;;
+
 
 (defn init [domains variables constraints]
   {:domains domains
@@ -153,6 +171,35 @@
              (assoc :domains (disj (:domains csp) d ))))
        (:domains csp)))
 
+;; (next-csps (first (next-csps example-csp)))
+
+;; => ({:domains #{[0 0] [3 0] [2 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" nil, "John" nil, "James" nil}}
+
+;; => ({:domains #{[3 0] [2 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" [0 0], "John" nil, "James" nil}}
+;;     {:domains #{[0 0] [2 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" [3 0], "John" nil, "James" nil}}
+;;     {:domains #{[0 0] [3 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" [2 0], "John" nil, "James" nil}}
+;;     {:domains #{[0 0] [3 0] [2 0]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" [1 2], "John" nil, "James" nil}})
+
+
+
+
+
+
 
 (defn backtracking-seq [csps]
   (lazy-seq (if-let [[$first & $rest] (seq csps)]
@@ -162,11 +209,108 @@
                                                 $rest)))
                 (backtracking-seq $rest)))))
 
+
+
+;; (let [[$first & $rest](seq (next-csps example-csp))]
+;;   (consistent? $first)
+;;   )
+;; => {:domains #{[0 0] [3 0] [2 0] [1 2]},
+;;     :variables ["Jill" "Sally" "John" "James"],
+;;     :any-constraints-violated? #object [cljs$core$sp2],
+;;     :assignment {"Jill" [2 2], "Sally" nil, "John" nil, "James" nil}}
+
+
+
 (defn backtracking [csp]
+
   (if-let [result (first (filter complete?
                                  (backtracking-seq (next-csps csp))))]
     result
     :failure))
+
+
+;; (def example-csp
+;;  {:domains #{[0 0] [1 2] [2 0] [2 2] [3 0]},
+;;   :variables ["Jill" "Sally" "John" "James"],
+;;   :any-constraints-violated?(apply some-fn #{(constraint :non-adjacent "James" "John" 2)
+;;                                              (constraint :proximity "Jill" "Sally" 1)
+;;                                              }),
+;;   :assignment {"Jill" nil, "Sally" nil, "John" nil, "James" nil}}
+;;   )
+
+
+
+;; (take 10 (filter complete? (backtracking-seq (next-csps example-csp))))
+;; => ({:domains #{[2 0]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" [1 2], "John" [0 0], "James" [3 0]}}
+;;     {:domains #{},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment
+;;      {"Jill" [2 2], "Sally" [1 2], "John" [0 0], "James" [3 0], nil [2 0]}}
+;;     {:domains #{[2 0]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" [1 2], "John" [3 0], "James" [0 0]}}
+;;     {:domains #{},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment
+;;      {"Jill" [2 2], "Sally" [1 2], "John" [3 0], "James" [0 0], nil [2 0]}}
+;;     {:domains #{[1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [3 0], "Sally" [2 0], "John" [2 2], "James" [0 0]}}
+;;     {:domains #{},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment
+;;      {"Jill" [3 0], "Sally" [2 0], "John" [2 2], "James" [0 0], nil [1 2]}}
+;;     {:domains #{[1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [3 0], "Sally" [2 0], "John" [0 0], "James" [2 2]}}
+;;     {:domains #{},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment
+;;      {"Jill" [3 0], "Sally" [2 0], "John" [0 0], "James" [2 2], nil [1 2]}}
+;;     {:domains #{[2 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [3 0], "Sally" [2 0], "John" [0 0], "James" [1 2]}}
+;;     {:domains #{},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment
+;;      {"Jill" [3 0], "Sally" [2 0], "John" [0 0], "James" [1 2], nil [2 2]}})
+
+;; (next-csps example-csp)
+
+;; (next-csps example-csp)
+;; => ({:domains #{[0 0] [3 0] [2 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 2], "Sally" nil, "John" nil, "James" nil}}
+;;     {:domains #{[2 2] [3 0] [2 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [0 0], "Sally" nil, "John" nil, "James" nil}}
+;;     {:domains #{[2 2] [0 0] [2 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [3 0], "Sally" nil, "John" nil, "James" nil}}
+;;     {:domains #{[2 2] [0 0] [3 0] [1 2]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [2 0], "Sally" nil, "John" nil, "James" nil}}
+;;     {:domains #{[2 2] [0 0] [3 0] [2 0]},
+;;      :variables ["Jill" "Sally" "John" "James"],
+;;      :any-constraints-violated? #object [cljs$core$sp2],
+;;      :assignment {"Jill" [1 2], "Sally" nil, "John" nil, "James" nil}})
+
 
 
 (defmulti constraint (fn [type & args] type))
@@ -175,18 +319,42 @@
   (let [[student1 student2 d] args]
     (fn [csp]
       (if-let [s1 (get-in csp [:assignment student1])]
-        (<= (distance s1 (get-in csp [:assignment student2])) d) ;;If this is true, then it is bad!
+        (if-let [s2 (get-in csp [:assignment student2])]
+          (<= (distance s1 s2) d) ;;If this is true, then it is bad!
+          false)
         false
         ))))
+
+;; (defmethod constraint :proximity [type & args]
+;;   (let [[student1 student2 d] args]
+;;     (fn [csp]
+;;       (if-let [s1 (get-in csp [:assignment student1])]
+;;         (> (distance s1 (get-in csp [:assignment student2])) d) ;;If this is true, then it is bad!
+;;         false ;;false means there is no error
+;;         ))))
+
+
 
 (defmethod constraint :proximity [type & args]
   (let [[student1 student2 d] args]
     (fn [csp]
       (if-let [s1 (get-in csp [:assignment student1])]
-        (> (distance s1 (get-in csp [:assignment student2])) d) ;;If this is true, then it is bad!
-        false
-        ))))
+        (if-let [s2 (get-in csp [:assignment student2])]
+          (> (distance s1 s2) d) ;; If this is true, then it is bad!
+          false)
+        false)))) ;; false means there is no error
 
+
+(defmethod constraint :empty [type & args]
+  (fn [csp]
+    false))
+
+(defn set-up-constraints [constraints]
+  (let [constraints-filtered (filter (fn [x] (first x)) constraints)]
+  (if (empty? constraints-filtered)
+    (set [(constraint :empty, "", "", 0)])
+    (set (map (fn [[c t s1 s2 d]] (constraint t s1 s2 d)) constraints-filtered))))
+)
 ;;==============================================
 ;; ROOM CONVERSIONS ============================
 ;;==============================================
@@ -214,62 +382,241 @@
             row (first (second allocation))
             coll (second (second allocation))
             new-value (first allocation)]
-          (recur (rest a)
-                 (update-room r row coll new-value)
-                               )))))
+        (recur (rest a) (update-room r row coll new-value)
+               )))))
+
+(defn allocation? [room]
+  (boolean (some string? (flatten room))))
 
 ;; TODO maximum distance. teacher proximal. seating preference
 ;;==============================================
 ;; GENERATE SEATING PLAN =======================
 ;;==============================================
 
-
-
 (defn generate-seating-plan [room students constraints]
   (reset! counter 0)
+  ;; (js/console.log "generate-seating-plan being run")
   (let [
         cleared-room (mapv (fn [row] (mapv (fn [item] (if (string? item) :student item)) row)) room)
-        students (cljs.core.shuffle students)         ;;variables (students)
+        ;;students (cljs.core.shuffle students)         ;;variables (students)
         csp (init (convert-room-to-seats cleared-room) ;;domains (seats)
                   students ;;variables (students)
-                  (set (map (fn [[t s1 s2 d]] (constraint t s1 s2 d)) constraints))
+                  (set-up-constraints constraints)
+                  ;;(set (map (fn [[t s1 s2 d]] (constraint t s1 s2 d)) constraints))
                   ;; constraints
                   )
-        result (backtracking csp)]
-    (update-room-with-allocation cleared-room (:assignment result)))
+        result (backtracking csp)
+        allocated-room (update-room-with-allocation cleared-room (:assignment result))
+        ]
+        ;; (js/alert (str csp))
+    (if (allocation? allocated-room)
+;; true
+      allocated-room
+      (do
+        ;; (js/alert "Could not find an allocation with this seating plan, students and constraints. Some potential solutions are: \n1. Add some extra seats\n2. Remove some constraints\n3. Remove some students.")
+        ;; (js/console.log "Hello")
+;; false
+        allocated-room
+        )
+      )
+    )
   )
 
 
-(def room [
-  [:student nil nil]
-  [nil      nil :student]
-  [:student nil nil]
-  [nil      nil nil]
-  [:student nil :student]
-  [nil      nil :student]
-  [nil      nil nil]])
 
-(def constraints [[:non-adjacent "James" "John" 2] [:proximity "Jill" "Sally" 1]])
 
-;;Original
-(def students ["Sally" "Jill" "James" "Jack" "John"])
-;;Does not work
-;; (def students ["John" "Jill" "Sally" "James" "Jack"])
-;; (def students ["John" "James" "Jill" "Jack" "Sally"])
-;; (def students ["Jill" "James" "John" "Sally" "Jack"])
-;; (def students ["Jill" "James" "John" "Jack" "Sally"])
-;; (def students ["James" "Jill" "John" "Jack" "Sally"])
-;; (def students ["James" "Jill" "Sally" "John" "Jack"])
-;; (def students ["James" "Jill" "John" "Sally" "Jack"])
-;; (def students ["James" "John" "Jack" "Sally" "Jill"])
-;; (def students ["Jack" "Jill" "John" "James" "Sally"])
-;; (def students ["Jack" "Jill" "John" "James" "Sally"])
-;; (def students ["Jack" "James" "Jill" "Sally" "John"])
-;; (def students ["Jack" "James" "Jill" "John" "Sally"])
-;; (def students ["Jack" "James" "John" "Jill" "Sally"])
-;; (def students ["Jack" "John" "Jill" "Sally" "James"])
+;; (defn init [domains variables constraints]
+;;   {:domains domains
+;;    :variables variables
+;;    :any-constraints-violated? (apply some-fn constraints)
+;;    :assignment (zipmap variables (repeat nil))})
 
-(generate-seating-plan room students constraints)
+;; (defn consistent? [{:keys [any-constraints-violated?]
+;;                     :as csp}]
+;;   (swap! counter inc)
+;;   (not (any-constraints-violated? csp)))
+;; work out assignments from seating-plan
+
+
+(defn convert-room-to-assignment [seating-plan]
+  (let [rows (count seating-plan)
+        cols (count (first seating-plan))]
+    (into {}
+     (for [row (range rows)
+           col (range cols)
+           :when (and (not= (get-in seating-plan [row col]) nil)
+                      (not= (get-in seating-plan [row col]) :desk)
+                      (not= (get-in seating-plan [row col]) :student)
+                      )]
+       {(get-in seating-plan [row col])
+        [row col]}
+       ))))
+
+(defn check-constraints? [seating-plan constraints]
+  (let [
+        csp {
+             :any-constraints-violated? (apply some-fn (set-up-constraints constraints))
+             :assignment (convert-room-to-assignment seating-plan)
+             }
+       ]
+    (not ((:any-constraints-violated? csp) csp))))
+
+;; (def room [
+;;            [:student nil nil]
+;;            [nil      nil :student]
+;;            [:student nil :student]
+;;            [:student nil nil]
+;;            ])
+
+;; (def students ["Jill" "Sally" "John" "James"])
+;; (generate-seating-plan room students constraints)
+
+;; (def combinations
+;;   '(
+;;   ("John" "James" "Sally" "Jill")
+;;   ("John" "James" "Jill" "Sally")
+;;   ("John" "Sally" "James" "Jill")
+;;   ("John" "Sally" "Jill" "James")
+;;   ("John" "Jill" "James" "Sally")
+;;   ("John" "Jill" "Sally" "James")
+;;   ("James" "John" "Sally" "Jill")
+;;   ("James" "John" "Jill" "Sally")
+;;   ("James" "Sally" "John" "Jill")
+;;   ("James" "Sally" "Jill" "John")
+;;   ("James" "Jill" "John" "Sally")
+;;   ("James" "Jill" "Sally" "John")
+;;   ("Sally" "John" "James" "Jill")
+;;   ("Sally" "John" "Jill" "James")
+;;   ("Sally" "James" "John" "Jill")
+;;   ("Sally" "James" "Jill" "John")
+;;   ("Sally" "Jill" "John" "James")
+;;   ("Sally" "Jill" "James" "John")
+;;   ("Jill" "John" "James" "Sally")
+;;   ("Jill" "John" "Sally" "James")
+;;   ("Jill" "James" "John" "Sally")
+;;   ("Jill" "James" "Sally" "John")
+;;   ("Jill" "Sally" "John" "James")
+;;   ("Jill" "Sally" "James" "John")))
+
+
+
+;; (def constraints [[true :non-adjacent "James" "John" 2] [true :proximity "Jill" "Sally" 1]])
+
+
+;; (map
+;;  (fn [[one two three four :as students]]
+;;    (let [students [one two three four]]
+;;      {students (generate-seating-plan room students constraints)}))
+;; combinations
+;;      )
+;; => ({["John" "James" "Sally" "Jill"] true}
+;;     {["John" "James" "Jill" "Sally"] true}
+;;     {["John" "Sally" "James" "Jill"] true}
+;;     {["John" "Sally" "Jill" "James"] true}
+;;     {["John" "Jill" "James" "Sally"] true}
+;;     {["John" "Jill" "Sally" "James"] true}
+;;     {["James" "John" "Sally" "Jill"] true}
+;;     {["James" "John" "Jill" "Sally"] true}
+;;     {["James" "Sally" "John" "Jill"] true}
+;;     {["James" "Sally" "Jill" "John"] true}
+;;     {["James" "Jill" "John" "Sally"] true}
+;;     {["James" "Jill" "Sally" "John"] true}
+;;     {["Sally" "John" "James" "Jill"] true}
+;;     {["Sally" "John" "Jill" "James"] true}
+;;     {["Sally" "James" "John" "Jill"] true}
+;;     {["Sally" "James" "Jill" "John"] true}
+;;     {["Sally" "Jill" "John" "James"] true}
+;;     {["Sally" "Jill" "James" "John"] true}
+;;     {["Jill" "John" "James" "Sally"] true}
+;;     {["Jill" "John" "Sally" "James"] true}
+;;     {["Jill" "James" "John" "Sally"] true}
+;;     {["Jill" "James" "Sally" "John"] true}
+;;     {["Jill" "Sally" "John" "James"] true}
+;;     {["Jill" "Sally" "James" "John"] true})
+
+
+
+
+
+;; (def room-data-csp
+;;   {
+;;    ;; :room [[:student nil nil]
+;;    ;;        [nil nil :student]
+;;    ;;        [:student nil :student]
+;;    ;;        [:student nil nil]] ;; Room representation
+;;    :domains #{[0 0] [1 2] [2 0] [2 2] [3 0]}  ;; Domains (seats)
+;;    :variables ["Sally" "Jill" "James" "John"] ;; Variables (students)
+;;    :constraints #{
+;;                   (constraint :non-adjacent "James" "John" 2)
+;;                   (constraint :proximity "Jill" "Sally" 1)
+;;                   }
+;;    :assignment
+;;    {}
+;;    ;; {"Sally" [2 2]
+;;    ;;  "Jill" [1 0]
+;;    ;;  "James" [3 2]
+;;    ;;  "Jack" [1 1]
+;;    ;;  "John" [0 1]}
+;;    }) ;; Initial assignment
+
+;; => ({["John" "James" "Sally" "Jill"] false}
+;;     {["John" "James" "Jill" "Sally"] true}
+;;     {["John" "Sally" "James" "Jill"] false}
+;;     {["John" "Sally" "Jill" "James"] false}
+;;     {["John" "Jill" "James" "Sally"] true}
+;;     {["John" "Jill" "Sally" "James"] true}
+;;     {["James" "John" "Sally" "Jill"] false}
+;;     {["James" "John" "Jill" "Sally"] true}
+;;     {["James" "Sally" "John" "Jill"] false}
+;;     {["James" "Sally" "Jill" "John"] false}
+;;     {["James" "Jill" "John" "Sally"] true}
+;;     {["James" "Jill" "Sally" "John"] true}
+;;     {["Sally" "John" "James" "Jill"] false}
+;;     {["Sally" "John" "Jill" "James"] false}
+;;     {["Sally" "James" "John" "Jill"] false}
+;;     {["Sally" "James" "Jill" "John"] false}
+;;     {["Sally" "Jill" "John" "James"] false}
+;;     {["Sally" "Jill" "James" "John"] false}
+;;     {["Jill" "John" "James" "Sally"] true}
+;;     {["Jill" "John" "Sally" "James"] true}
+;;     {["Jill" "James" "John" "Sally"] true}
+;;     {["Jill" "James" "Sally" "John"] true}
+;;     {["Jill" "Sally" "John" "James"] true}
+;;     {["Jill" "Sally" "James" "John"] true})
+
+;;When sally is before jill it is true
+
+;; => ({["John" "James" "Sally" "Jill"] true}
+;;     {["John" "James" "Jill" "Sally"] false}
+;;     {["John" "Sally" "James" "Jill"] true}
+;;     {["John" "Sally" "Jill" "James"] true}
+;;     {["John" "Jill" "James" "Sally"] false}
+;;     {["John" "Jill" "Sally" "James"] false}
+;;     {["James" "John" "Sally" "Jill"] true}
+;;     {["James" "John" "Jill" "Sally"] false}
+;;     {["James" "Sally" "John" "Jill"] true}
+;;     {["James" "Sally" "Jill" "John"] true}
+;;     {["James" "Jill" "John" "Sally"] false}
+;;     {["James" "Jill" "Sally" "John"] false}
+;;     {["Sally" "John" "James" "Jill"] true}
+;;     {["Sally" "John" "Jill" "James"] true}
+;;     {["Sally" "James" "John" "Jill"] true}
+;;     {["Sally" "James" "Jill" "John"] true}
+;;     {["Sally" "Jill" "John" "James"] true}
+;;     {["Sally" "Jill" "James" "John"] true}
+;;     {["Jill" "John" "James" "Sally"] false}
+;;     {["Jill" "John" "Sally" "James"] false}
+;;     {["Jill" "James" "John" "Sally"] false}
+;;     {["Jill" "James" "Sally" "John"] false}
+;;     {["Jill" "Sally" "John" "James"] false}
+;;     {["Jill" "Sally" "James" "John"] false})
+
+
+;; (allocation?
+
+;; (generate-seating-plan room students constraints)
+;;  )
+
 
 ;; (def example-seats #{[0 1] [1 0] [1 1] [2 2] [3 2]})
 ;; (def example-students ["Sally" "Jill" "James" "Jack" "John"])
@@ -534,8 +881,6 @@
 ;;     (if-let [a (get-in csp [:assignment state-a])]
 ;;       (= a (get-in csp [:assignment state-b]))
 ;;       false)))
-
-
 
 ;; (reset! counter 0)
 

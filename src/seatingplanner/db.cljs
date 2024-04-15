@@ -18,6 +18,7 @@
            :add-student false
            :add-constraint false
            :add-layout false
+           :copy-seating-plan false
            :add-room false
            :copy-room false
 
@@ -30,15 +31,15 @@
              1 {
                 :name "Year 7 Digital Technology"
                 :students ["Sally" "Jill" "James" "Jack" "John"]
-                :constraints [[:non-adjacent, "James", "John", 2]
-                              [:proximity, "Jill", "Sally", 1]]
+                :constraints [[true :non-adjacent, "James", "John", 2]
+                              [false :proximity, "Jill", "Sally", 1]]
                 :seating-plans [{:id 2 :active true}
                                 {:id 1 :active false}]
                 }
              2 {
                 :name "Year 10 Digital Technology"
                 :students ["Mally" "Jill" "Eleanor" "Alan"]
-                :constraints [[:non-adjacent "Eleanor" "Jill" 2]]
+                :constraints [[true :non-adjacent "Eleanor" "Jill" 2]]
                 :seating-plans [{:id 3 :active true}]
                 }
              )
