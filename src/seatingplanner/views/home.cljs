@@ -41,7 +41,7 @@
    ["Rooms"    :routes/#rooms]
    ;; ["Room"    :routes/#room]
    ["Classes" :routes/#classes]
-   ["Editor" :routes/#class]
+   ["Seating Plans" :routes/#class]
    ])
 
 (defn route-info [route]
