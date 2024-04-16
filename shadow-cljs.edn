@@ -23,7 +23,7 @@
                                    :http-port 8021
                                    :http-root "resources/public/"
                                    :after-load seatingplanner.core/re-render
-                                   ;; :preloads  [day8.re-frame-10x.preload devtools.preload shadow.remote.runtime.cljs.browser]
+                                   :preloads  [day8.re-frame-10x.preload devtools.preload shadow.remote.runtime.cljs.browser]
                                    }
                 }}}
 

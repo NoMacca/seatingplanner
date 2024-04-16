@@ -20,6 +20,7 @@
 (defn check-and-throw
   "Throws an exception if `db` doesn't match the Spec `a-spec`."
   [a-spec db]
+  (js/alert (str "a-spec " a-spec " db " db))
   (when-not (s/valid? a-spec db)
     (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
 
@@ -34,24 +35,14 @@
 
 
 (def interceptors [
-                   ;; check-spec-interceptor
-                   ;; (re-frame/path :full-screen)
-                   ;; (re-frame/path :forms)
-                   ;; (re-frame/path :toggle-spot)
-                   ;; (re-frame/path :class-id)
-                   ;; (re-frame/path :classes)
-                   ;; (re-frame/path :seating-plans)
-                   ;; (re-frame/path :room-id)
-                   ;; (re-frame/path :rooms)
-                   ;; (re-frame/path :seatingplanner)
-                   ->local-store])
+                   (re-frame/path :seatingplanner)
+                   ->local-store
+                   ])
 
 
 ;; (def interceptors [
 ;;                    (re-frame/path :class-timers)
 ;;                    ->local-store])
-
-
 
 ;;TODO
 ;; LOCAL STORE
@@ -60,21 +51,25 @@
  [(re-frame/inject-cofx :local-store-classes)]
  (fn [{:keys [db local-store-classes]} _]
    ;; (js/alert (str "local-story-classes " (empty? local-store-classes)))
+   ;; (js/alert (str "local-story-classes " local-store-classes))
    (if (empty? local-store-classes)
      {:db db/default-db}
-     {:db (assoc db/default-db :rooms local-store-classes)}))
+     {:db
+      ;; (assoc
+      ;;  db/default-db
+       local-store-classes
+       ;; )
+      }))
  )
-
-
-
 
 ;;==============================
 ;; ADD CLASS ===================
 ;;==============================
 (re-frame/reg-event-fx
  :add-class
- ;; interceptors
+ interceptors
  (fn [{db :db} [_ {:keys [values dirty path]}]]
+   (js/console.log (str db))
    (let [
          classes (:classes db)
          next-id (h/allocate-next-id classes)
@@ -84,26 +79,26 @@
          ]
      {:db
       (-> db
-       (assoc-in [:forms :add-class] false)
-       (assoc :classes
-              (h/create-item classes next-id {:name class-name
-                                              :students students
-                                              :constaints []
-                                              :seating-plans []
-                                              }
-                             )))
+          (assoc-in [:forms :add-class] false)
+          (assoc :classes
+                 (h/create-item classes next-id {:name class-name
+                                                 :students (vec students)
+                                                 :constraints []
+                                                 :seating-plans []
+                                                 }
+                                )))
       })))
 
 
 (re-frame/reg-sub
  :add-class-form-status
  (fn [db _ ]
-   (get-in db [:forms :add-class])
+   (get-in db [:seatingplanner :forms :add-class])
    ))
 
 (re-frame/reg-event-db
  :toggle-add-class-form-status
- ;;  interceptors
+ interceptors
  (fn [db _ ]
    (let [status (get-in db [:forms :add-class])]
     (assoc-in db [:forms :add-class] (not status)))
@@ -111,7 +106,7 @@
 
 (re-frame/reg-event-db
  :delete-class
- ;; interceptors
+ interceptors
  (fn [db [_ class-id]]
    (update-in db [:classes] dissoc class-id)
    )
@@ -124,12 +119,12 @@
 (re-frame/reg-sub
  :classes
  (fn [db _]
-   (:classes db)))
+   (:classes (:seatingplanner db))))
 
 (re-frame/reg-sub
  :class-id
  (fn [db _]
-   (:class-id db)))
+   (:class-id (:seatingplanner db))))
 
 
 ;;==============================
@@ -137,13 +132,12 @@
 ;;==============================
 (re-frame/reg-event-db
  :delete-student
- ;; interceptors
+ interceptors
  (fn [db [_ class-id name]]
    (let [students (get-in db [:classes class-id :students])
          new-students (h/remove-item name students)]
      (assoc-in db [:classes class-id :students] new-students)
      )))
-
 
 (defn student-exists? [name names]
   (reduce #(or %1 (= %2 name)) false names)
@@ -161,14 +155,10 @@
        [row col]
        ))))
 
-
-
 (defn add-student-to-new-row [name seating-plan]
   (let [length (count (first seating-plan))
         ]
-        (vec (conj (repeat length nil) name))
-    )
-  )
+        (vec (conj (repeat length nil) name))))
 
 (defn add-new-student [name seating-plan]
   (let [spaces (first (convert-room-to-students seating-plan))]
@@ -176,13 +166,11 @@
     (if spaces
       (assoc-in seating-plan spaces name)
       (conj seating-plan (add-student-to-new-row name seating-plan));;(js/alert "false")
-      )
-    )
-  )
+      )))
 
 (re-frame/reg-event-fx
  :add-student
- ;; interceptors
+ interceptors
  (fn [{db :db} [_ class-id active-class-seating-plan-id {:keys [values dirty path]}]]
    (let [student-name (get values "input")
          students (get-in db [:classes class-id :students])
@@ -209,6 +197,7 @@
 ;;TODO check if student exists on this seating plan
 (re-frame/reg-event-db
  :student-to-seating-plan
+interceptors
  (fn [db [_ student-name active-class-seating-plan-id]]
    (let [seating-plan (get-in db [:seating-plans, active-class-seating-plan-id, :layout])
 
@@ -220,7 +209,7 @@
          db)
        (assoc-in db [:seating-plans, active-class-seating-plan-id, :layout] (add-new-student student-name seating-plan))
        )
-)
+     )
    )
  )
 
@@ -232,12 +221,12 @@
 (re-frame/reg-sub
  :add-student-form-status
  (fn [db _ ]
-   (get-in db [:forms :add-student])
+   (get-in db [:seatingplanner :forms :add-student])
    ))
 
 (re-frame/reg-event-db
  :toggle-add-student-form-status
- ;; interceptors
+ interceptors
  (fn [db _ ]
    (let [status (get-in db [:forms :add-student])]
     (assoc-in db [:forms :add-student] (not status)))
@@ -250,7 +239,7 @@
 
 (re-frame/reg-event-db
  :delete-constraint
- ;; interceptors
+ interceptors
  (fn [db [_ class-id constraint]]
    (let [constraints (get-in db [:classes class-id :constraints])
          new-constraints (h/remove-item constraint constraints)
@@ -260,6 +249,7 @@
 
 (re-frame/reg-event-db
  :toggle-constraint
+ interceptors
  (fn [db [_ class-id [c t s1 s2 d :as constraint]]]
    (let [
          constraints (get-in db [:classes class-id :constraints])
@@ -271,7 +261,7 @@
 
 (re-frame/reg-event-fx
  :add-constraint
- ;; interceptors
+ interceptors
  (fn [{db :db} [_ class-id {:keys [values dirty path]}]]
    (let [s1 (get values "s1")
          s2 (get values "s2")
@@ -282,25 +272,23 @@
      {:db
       (-> db
           (assoc-in [:forms :add-constraint] false)
-          (assoc-in [:classes class-id :constraints] (conj constraints new-constraint) )
+          (assoc-in [:classes class-id :constraints] (vec (conj constraints new-constraint)) )
           )}
      )))
 
  (re-frame/reg-sub
   :add-constraint-form-status
   (fn [db _ ]
-    (get-in db [:forms :add-constraint])
+    (get-in db [:seatingplanner :forms :add-constraint])
     ))
 
 (re-frame/reg-event-db
  :toggle-add-constraint-form-status
- ;; interceptors
+ interceptors
  (fn [db _ ]
    (let [status (get-in db [:forms :add-constraint])]
     (assoc-in db [:forms :add-constraint] (not status)))
    ))
-
-
 
 ;;==============================
 ;; LAYOUTS =====================
@@ -311,7 +299,7 @@
 
 (re-frame/reg-event-db
  :delete-layout
- ;; interceptors
+ interceptors
  (fn [db [_ class-id id]]
    (let [class-seating-plans (get-in db [:classes, class-id, :seating-plans])
          removed (filter #(not= id (:id %)) class-seating-plans)
@@ -363,6 +351,7 @@
 
 (re-frame/reg-event-db
  :change-layout
+ interceptors
  (fn [db [_ class-id active-layout-id]]
    (let [seating-plans (get-in db [:classes, class-id, :seating-plans])
          new-seating-plans (map #(if (= (:id %) (int active-layout-id))
@@ -374,12 +363,12 @@
 (re-frame/reg-sub
  :add-layout-form-status
  (fn [db _ ]
-   (get-in db [:forms :add-layout])
+   (get-in db [:seatingplanner :forms :add-layout])
    ))
 
 (re-frame/reg-event-db
  :toggle-add-layout-form-status
- ;; interceptors
+ interceptors
  (fn [db _ ]
    (let [status (get-in db [:forms :add-layout])]
     (assoc-in db [:forms :add-layout] (not status)))
@@ -389,7 +378,7 @@
 
 (re-frame/reg-event-db
  :toggle-copy-seating-plan-form-status
- ;; interceptors
+ interceptors
  (fn [db _]
    (let [status (get-in db [:forms :copy-seating-plan])]
     (assoc-in db [:forms :copy-seating-plan] (not status)))
@@ -398,7 +387,7 @@
 (re-frame/reg-sub
  :copy-seating-plan-form-status
  (fn [db _]
-   (get-in db [:forms :copy-seating-plan])))
+   (get-in db [:seatingplanner :forms :copy-seating-plan])))
 
 
 (re-frame/reg-event-fx
@@ -434,6 +423,7 @@
 
 (re-frame/reg-event-fx
  :validate
+ interceptors
  (fn [{db :db} [_ class-id active-class-seating-plan-id]]
    (let [
          students (set (get-in db [:classes, class-id, :students]))
@@ -471,7 +461,7 @@
 ;;==============================
 (re-frame/reg-event-db
  :full-screen-toggle
- ;; interceptors
+ interceptors
  (fn [db _ ]
    (assoc db :full-screen (not (:full-screen db))))
  )
@@ -479,7 +469,7 @@
 (re-frame/reg-sub
  :full-screen
  (fn [db _ ]
-    (:full-screen db))
+    (:full-screen (:seatingplanner db)))
    )
 
 
@@ -490,23 +480,16 @@
 (re-frame/reg-sub
  :seating-plans
  (fn [db _ ]
-   (get db :seating-plans)
+   (get-in db [:seatingplanner :seating-plans])
    ))
 
-;;==============================
-;; GET APP-DB ==================
-;;==============================
-(re-frame/reg-sub
- :app-db
- (fn [db _]
-   db))
 
 ;;==============================
 ;; ROOMS =======================
 ;;==============================
 (re-frame/reg-event-db
  :room-id
- ;; interceptors
+ interceptors
  (fn [db [_ id]]
    (assoc db :room-id id)
    ))
@@ -514,22 +497,22 @@
 (re-frame/reg-sub
  :room-id
  (fn [db _]
-   (:room-id db)))
+   (:room-id (:seatingplanner db))))
 
 (re-frame/reg-sub
  :rooms
  (fn [db _]
-   (:rooms db)))
+   (:rooms (:seatingplanner db))))
 
 (re-frame/reg-sub
  :room
  (fn [db [_ id]]
-   (get-in db [:rooms id])))
+   (get-in db [:seatingplanner :rooms id])))
 
 
 (re-frame/reg-event-fx
  :add-room
- ;; interceptors
+ interceptors
  (fn [{db :db} [_ {:keys [values dirty path]}]]
    (let [
          rooms (:rooms db)
@@ -547,7 +530,7 @@
 
 (re-frame/reg-event-db
  :delete-room
- ;; interceptors
+ interceptors
  (fn [db [_ room-id]]
    (update-in db [:rooms] dissoc room-id)
    )
@@ -556,12 +539,12 @@
 (re-frame/reg-sub
  :add-room-form-status
  (fn [db _]
-   (get-in db [:forms :add-room])
+   (get-in db [:seatingplanner :forms :add-room])
    ))
 
 (re-frame/reg-event-db
  :toggle-add-room-form-status
- ;; interceptors
+ interceptors
  (fn [db _ ]
    (let [status (get-in db [:forms :add-room])]
      (assoc-in db [:forms :add-room] (not status)))
@@ -573,7 +556,7 @@
 
 (re-frame/reg-event-fx
  :copy-room
- ;; interceptors
+ interceptors
  (fn [{db :db} [_ {:keys [values dirty path]} room-id]]
    (let [
          rooms (:rooms db)
@@ -597,7 +580,7 @@
 
 (re-frame/reg-event-db
  :toggle-copy-room-form-status
- ;; interceptors
+ interceptors
  (fn [db _ ]
    (let [status (get-in db [:forms :copy-room])]
      (assoc-in db [:forms :copy-room] (not status)))
@@ -605,7 +588,7 @@
 
 (re-frame/reg-event-db
  :toggle-on-copy-room-form-status
- ;; interceptors
+ interceptors
  (fn [db [_ room-id] ]
    (let [status (get-in db [:forms :copy-room])]
      (-> db
@@ -618,7 +601,7 @@
 (re-frame/reg-sub
  :copy-room-form-status
  (fn [db _]
-   (get-in db [:forms :copy-room])
+   (get-in db [:seatingplanner :forms :copy-room])
    ))
 
 
@@ -636,6 +619,7 @@
 
 (re-frame/reg-event-db
  :clear-all
+interceptors
  (fn [db [_ path]]
    (let [layout (get-in db path)
          num-rows (count layout)
@@ -648,6 +632,7 @@
 
 (re-frame/reg-event-db
  :change-cell
+ interceptors
  (fn [db [_ path row column]]
    (let [toggle-spot (:toggle-spot db)
          layout (get-in db path)
@@ -678,6 +663,7 @@
 
 (re-frame/reg-event-db
  :swap-cells
+ interceptors
  (fn [db [_ path dragging-id valid-drop-id]]
    (let [
          layout (get-in db path)
@@ -702,13 +688,14 @@
 
 (re-frame/reg-event-db
  :toggle-spot
+ interceptors
  (fn [db [_ type]]
    (assoc db :toggle-spot type)))
 
 (re-frame/reg-sub
  :toggle-spot
  (fn [db _]
-   (:toggle-spot db)))
+   (:toggle-spot (:seatingplanner db))))
 
 
 
@@ -745,6 +732,7 @@
 
 (re-frame/reg-event-db
  :add-column
+ interceptors
  (fn [db [_ path]]
    (let [
          layout (get-in db path)
@@ -753,6 +741,7 @@
 
 (re-frame/reg-event-db
  :remove-column
+ interceptors
  (fn [db [_ path]]
    (let [
          layout (get-in db path)
@@ -761,6 +750,7 @@
 
 (re-frame/reg-event-db
  :add-row
+ interceptors
  (fn [db [_ path]]
 
    (let [
@@ -775,6 +765,7 @@
 
 (re-frame/reg-event-db
  :remove-row
+ interceptors
  (fn [db [_ path]]
    (let [
          layout (get-in db path)
@@ -792,27 +783,27 @@
 ;;  )
 
 ;;TODO NEEDS TO BE UPDATED
-(re-frame/reg-sub
- :class-temp
- :<- [:classes]
- (fn [classes _]
-   (first classes)
-   ))
+;; (re-frame/reg-sub
+;;  :class-temp
+;;  :<- [:classes]
+;;  (fn [classes _]
+;;    (first classes)
+;;    ))
 
 (re-frame/reg-sub
  :get-class
- :<- [:classes]
- (fn [classes [_ id]]
+ (fn [db [_ id]]
    ;; (js/alert
     ;; (get classes id)
-   (h/read-item classes id)
+   (h/read-item (get-in db [:seatingplanner :classes]) id)
    )
  )
 
 (re-frame/reg-event-db
  :class-id
+ interceptors
  (fn [db [_ id]]
-   (assoc db :class-id id)
+   (assoc-in db [:seatingplanner :class-id] id)
    )
  )
 
@@ -820,6 +811,7 @@
 ;;TODO redo this function
 (re-frame/reg-event-db
  :organise
+ interceptors
  (fn [db [_ class-id seating-plan-id]]
    (let [
          class (get-in db [:classes, class-id])

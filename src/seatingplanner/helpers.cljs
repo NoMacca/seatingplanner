@@ -62,7 +62,6 @@
 ;;  )
 
 
-
 ;; (def foolasses (sorted-map
 ;;                 1 {
 ;;                    :name "Year 7 Digital Technology"
@@ -398,7 +397,7 @@
   ;; (js/console.log "generate-seating-plan being run")
   (let [
         cleared-room (mapv (fn [row] (mapv (fn [item] (if (string? item) :student item)) row)) room)
-        ;;students (cljs.core.shuffle students)         ;;variables (students)
+        students (cljs.core.shuffle students)         ;;variables (students)
         csp (init (convert-room-to-seats cleared-room) ;;domains (seats)
                   students ;;variables (students)
                   (set-up-constraints constraints)
@@ -413,7 +412,7 @@
 ;; true
       allocated-room
       (do
-        ;; (js/alert "Could not find an allocation with this seating plan, students and constraints. Some potential solutions are: \n1. Add some extra seats\n2. Remove some constraints\n3. Remove some students.")
+        (js/alert "Could not find an allocation with this seating plan, students and constraints. Some potential solutions are: \n1. Add some extra seats\n2. Remove some constraints\n3. Remove some students.")
         ;; (js/console.log "Hello")
 ;; false
         allocated-room
@@ -421,9 +420,6 @@
       )
     )
   )
-
-
-
 
 ;; (defn init [domains variables constraints]
 ;;   {:domains domains
@@ -775,125 +771,3 @@
 ;; ;;      :any-constraints-violated? #object [cljs$core$spn],
 ;; ;;      :assignment {:WA :blue, :NT nil, :Q nil, :NSW nil, :V nil, :SA nil, :T nil}})
 
-
-
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;; ;; (every? (some? (vals
-;; ;;           {:WA :blue, :NT nil, :Q nil, :NSW nil, :V nil, :SA nil, :T nil})))
-
-;; ;; (def numbers [1 2 3 5 5])
-;; (some? numbers)
-
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; (def csp-first (first (map (fn [d]
-;;                (assoc-in csp
-;;                          [:assignment (select-unassigned-variable csp)]
-;;                          d))
-;;              (:domains csp))))
-
-;; (let [{:keys [any-constraints-violated?]
-;;                     :as csp-e} csp-first ]
-
-;;   (any-constraints-violated? csp-e))
-
-
-;; ;; (defn consistent? [{:keys [any-constraints-violated?]
-;; ;;                     :as csp}]
-;; ;;   (swap! counter inc)
-;; ;;   (not (any-constraints-violated? csp)))
-
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ;; (defn even?
-;; ;;   [n] (if (integer? n)
-;; ;;         (zero? (bit-and n 1))
-;; ;;         (throw (js/Error. (str "Argument must be an integer: " n)))))
-
-;; (defn even-n? [n] false)
-;; (defn divisible-by-three? [n] (zero? (mod n 3)))
-;; (even? 12)
-;; (def any-matching?
-;;   (apply some-fn #{even-n? divisible-by-three?}))
-
-;; (any-matching? 6)
-
-;; (any-matching? 6) ;=> true (because 6 is even)
-;; (any-matching? 9) ;=> true (because 9 is divisible by 3)
-;; (any-matching? 5) ;=> false (because 5 is neither even nor divisible by 3)
-
-;; ;;============================================================
-;; ;; https://nextjournal.com/lomin/constraint-satisfaction-problems-and-functional-backtracking-search
-
-;; (def counter (atom 0))
-
-;; (defn init [domains variables constraints]
-;;   {:domains domains
-;;    :variables variables
-;;    :any-constraints-violated? (apply some-fn constraints)
-;;    :assignment (zipmap variables (repeat nil))})
-
-;; (defn complete? [csp]
-;;   (every? some? (vals (:assignment csp))))
-
-;; (defn consistent? [{:keys [any-constraints-violated?]
-;;                     :as csp}]
-;;   (swap! counter inc)
-;;   (not (any-constraints-violated? csp)))
-
-;; (defn select-unassigned-variable [csp]
-;;   (first (filter (comp nil?
-;;                        (partial get-in csp)
-;;                        (partial conj [:assignment]))
-;;                  (:variables csp))))
-
-;; (defn next-csps [csp]
-;;   (map (fn [d]
-;;          (assoc-in csp
-;;                    [:assignment (select-unassigned-variable csp)]
-;;                    d))
-;;        (:domains csp)))
-
-;; (defn backtracking-seq [csps]
-;;   (lazy-seq (if-let [[$first & $rest] (seq csps)]
-;;               (if (consistent? $first)
-;;                 (cons $first
-;;                       (backtracking-seq (concat (next-csps $first)
-;;                                                 $rest)))
-;;                 (backtracking-seq $rest)))))
-
-;; (defn backtracking [csp]
-;;   (if-let [result (first (filter complete?
-;;                                  (backtracking-seq (next-csps csp))))]
-;;     result
-;;     :failure))
-
-
-;; ;;This is the function that need to be changed.
-;; (defn constraint [state-a state-b]
-;;   (fn [csp]
-;;     (if-let [a (get-in csp [:assignment state-a])]
-;;       (= a (get-in csp [:assignment state-b]))
-;;       false)))
-
-;; (reset! counter 0)
-
-;; (let [csp (init #{:red :green :blue}
-;;                 [:WA :NT :Q :NSW :V :SA :T]
-;;                 #{(constraint :WA :NT)
-;;                   (constraint :WA :SA)
-;;                   (constraint :NT :SA)
-;;                   (constraint :NT :Q)
-;;                   (constraint :SA :Q)
-;;                   (constraint :SA :NSW)
-;;                   (constraint :SA :V)
-;;                   (constraint :Q :NSW)
-;;                   (constraint :V :T)})
-;;       result (backtracking csp)]
-;;   [@counter result])
