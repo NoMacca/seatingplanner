@@ -215,80 +215,156 @@
         rooms-options (vec (concat '({"" "Please select"})
                                (map #(hash-map (first %) (:name (second %))) rooms)) )
                        ]
-    ;; (js/alert rooms-options)
-    [fork/form {:path [:forms-add-layout]
-                :form-id "add-layout"
-                :prevent-default? true
-                :clean-on-unmount? true
-                :on-submit
-                ;; #(js/alert "Hello")
-                #(re-frame/dispatch [:add-layout class-id %])
-                }
-     (fn [{:keys [values
-                  form-id
-                  handle-change
-                  handle-blur
-                  handle-submit] :as props}]
 
-       [:form
-        {:id form-id
-         :on-submit handle-submit}
-
+    ;; (js/alert rooms)
+   (if (empty? rooms)
         [:div.modal {:class (str (if status "is-active" ""))}
          [:div.modal-background]
          [:div.modal-card
           [:header.modal-card-head
-           [:p.modal-card-title "Add layout"]
+           [:p.modal-card-title "Add a room first"]
            [:button.delete {:aria-label "close"
                             :on-click #(do
                                          (re-frame/dispatch [:toggle-add-layout-form-status])
                                          (.preventDefault %)
-                                         )}]]
+                                         )}
+            ]]
           [:section.modal-card-body
 
            [:div.grid ;;.flex.gap-4.flex-wrap ;;.overflow-auto.gap-4
-           [bulma/input props
-            {:name "name"
-             :label "Layout Name"
-             :type "text"
-             :class ""}]
 
-            [bulma/dropdown props
-             {:label "Room"
-              :name "room"
-              :options rooms-options
-              :class ""
-              }]
 
-            ;; [:div.grid.grid-cols-2
-
-            ;; [bulma/input props
-            ;;  {:name "w"
-            ;;   :label "Width"
-            ;;   :type "number"
-            ;;   :class ""}]
-
-            ;; [bulma/input props
-            ;;  {:name "h"
-            ;;   :label "Height"
-            ;;   :type "number"
-            ;;   :class ""}]
-            ;;  ]
+            [:button.button.is-success {:type "submit"
+                                    :on-click #(re-frame/dispatch [:toggle-add-room-form-status])
+                                        } "Add a room"]
 
             ]
            ]
+
           [:footer.modal-card-foot
            [:div.buttons {:class "buttons"}
-            [:button.button.is-success {:type "submit"
-                                        } "Add"]
             [:button.button {:class "button"
                              :on-click #(do
                                           (re-frame/dispatch [:toggle-add-layout-form-status])
                                           (.preventDefault %))}
              "Cancel"]
-            ]]
+            ]]]]
 
-          ]]])]))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     ;; [:p "mananage"]
+     ;; (js/alert rooms-options)
+     [fork/form {:path [:forms-add-layout]
+                 :form-id "add-layout"
+                 :prevent-default? true
+                 :clean-on-unmount? true
+                 :on-submit
+                 ;; #(js/alert "Hello")
+                 #(re-frame/dispatch [:add-layout class-id %])
+                 }
+      (fn [{:keys [values
+                   form-id
+                   handle-change
+                   handle-blur
+                   handle-submit] :as props}]
+
+        [:form
+         {:id form-id
+          :on-submit handle-submit}
+
+         [:div.modal {:class (str (if status "is-active" ""))}
+          [:div.modal-background]
+          [:div.modal-card
+           [:header.modal-card-head
+            [:p.modal-card-title "Add layout"]
+            [:button.delete {:aria-label "close"
+                             :on-click #(do
+                                          (re-frame/dispatch [:toggle-add-layout-form-status])
+                                          (.preventDefault %)
+                                          )}]]
+           [:section.modal-card-body
+
+            [:div.grid ;;.flex.gap-4.flex-wrap ;;.overflow-auto.gap-4
+             [bulma/input props
+              {:name "name"
+               :label "Layout Name"
+               :type "text"
+               :class ""}]
+
+             [bulma/dropdown props
+              {:label "Room"
+               :name "room"
+               :options rooms-options
+               :class ""
+               }]
+
+             [:button.button.w-min{
+                              :on-click #(do
+                                           (re-frame/dispatch [:toggle-add-room-form-status])
+                                           (.preventDefault %))
+                              } "Add room"]
+
+
+             ;; [:div.grid.grid-cols-2
+
+             ;; [bulma/input props
+             ;;  {:name "w"
+             ;;   :label "Width"
+             ;;   :type "number"
+             ;;   :class ""}]
+
+             ;; [bulma/input props
+             ;;  {:name "h"
+             ;;   :label "Height"
+             ;;   :type "number"
+             ;;   :class ""}]
+             ;;  ]
+
+             ]
+            ]
+           [:footer.modal-card-foot
+            [:div.buttons {:class "buttons"}
+             [:button.button.is-success {:type "submit"
+                                         } "Add"]
+             [:button.button {:class "button"
+                              :on-click #(do
+                                           (re-frame/dispatch [:toggle-add-layout-form-status])
+                                           (.preventDefault %))}
+              "Cancel"]
+             ]]
+
+           ]]])]
+)
+    )
+
+   )
 
 ;;==============================
 ;; ADD ROOM ====================

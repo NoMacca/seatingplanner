@@ -228,19 +228,7 @@
        ;;          "Back"]]
        ;;   ]]
 
-
-
-
-
-
-       )
-     ]
-
-
-    ))
-
-
-
+)]))
 
 ;;==============================
 ;;CLASS  =======================
@@ -251,8 +239,13 @@
         class @(re-frame/subscribe [:get-class class-id])
         ]
     [:<>
+     (if (empty? class)
      ;; [seating-plans class]
+      [:div.grid.rounded-xl.shadow-lg.items-center.p-6.m-4
+        [:button.button {:on-click #(re-frame/dispatch [:toggle-add-class-form-status])} "Add a Class"]]
      [layout-classes class-id class]
-     [:br]
+     )
 
+     [form/add-class]
+     [form/add-room]
      ]))
