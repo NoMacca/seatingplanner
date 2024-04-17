@@ -20,7 +20,7 @@
 (defn check-and-throw
   "Throws an exception if `db` doesn't match the Spec `a-spec`."
   [a-spec db]
-  (js/alert (str "a-spec " a-spec " db " db))
+  ;; (js/alert (str "a-spec " a-spec " db " db))
   (when-not (s/valid? a-spec db)
     (throw (ex-info (str "spec check failed: " (s/explain-str a-spec db)) {}))))
 
@@ -339,7 +339,7 @@ interceptors
          ;; height (get values "h")
          ;; layouts (get-in db [:classes class-id :layouts])
          ]
-     (js/alert (type new-seating-plan-name))
+     ;; (js/alert (type new-seating-plan-name))
      {:db
 
       (-> db
@@ -804,7 +804,7 @@ interceptors
  :class-id
  interceptors
  (fn [db [_ id]]
-   (assoc-in db [:seatingplanner :class-id] id)
+   (assoc-in db [:class-id] id)
    )
  )
 
