@@ -16,19 +16,19 @@
      [:div.column
       [:div.box.has-text-centered
        [:h1.title
-        "Welcome to Your Seating Planner"]
+        "Seating Planner"]
        [:p.subtitle
-        "Empowering you to create and manage your classroom seating plans."]
-       [:div.buttons.is-centered
+        "Steps"]
+       [:div.is-centered.grid
         [:a.button.is-medium
          {:href (rtfe/href :routes/#rooms)}
-         "1. Create Your Rooms"]
+         "1. Create Rooms"]
         [:a.button.is-medium
          {:href (rtfe/href :routes/#classes)}
-         "2. Create Your Classes"]
+         "2. Create Classes"]
         [:a.button.is-medium
          {:href (rtfe/href :routes/#class)}
-         "3. Create Your Seating Plans"]
+         "3. Create Seating Plans"]
         ]
 
        ]]]]

@@ -326,8 +326,9 @@ interceptors
          room-id (int (get values "room"))
          seating-plans (:seating-plans db)
 
+
          new-seating-plan-id (h/allocate-next-id seating-plans)
-         new-seating-plan-layout (get-in db [:rooms, room-id :layout])
+         new-seating-plan-layout (if (= 0 room-id) [[:student :student] [:student :student]] (get-in db [:rooms, room-id :layout]))
          new-seating-plan-name (get values "name")
          new-seating-plan {:name new-seating-plan-name, :layout new-seating-plan-layout}
          ;; ;; ADDING TO CLASS SEATING PLAN
@@ -338,7 +339,7 @@ interceptors
          ;; height (get values "h")
          ;; layouts (get-in db [:classes class-id :layouts])
          ]
-     (js/console.log room-id)
+     (js/alert (type new-seating-plan-name))
      {:db
 
       (-> db
@@ -525,7 +526,7 @@ interceptors
           (assoc-in [:forms :add-room] false)
           (assoc :rooms
                  (h/create-item rooms next-id {:name room-name
-                                               :layout (vec (repeat height (vec (repeat width nil))))
+                                               :layout (vec (repeat height (vec (repeat width :student))))
                                                })))})))
 
 (re-frame/reg-event-db

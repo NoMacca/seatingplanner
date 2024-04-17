@@ -176,7 +176,7 @@
               }]
 
             [bulma/dropdown props
-             {:label "Constraint Type"
+             {:label "Type"
               :name "type"
               :options [{"" "Please select"} {:proximity "Together"}
                {:non-adjacent "Apart"}]
@@ -212,7 +212,7 @@
 (defn add-layout [class-id]
   (let [status @(re-frame/subscribe [:add-layout-form-status])
         rooms @(re-frame/subscribe [:rooms])
-        rooms-options (vec (concat '({"" "Please select"})
+        rooms-options (vec (concat '({"default" "Please select"})
                                (map #(hash-map (first %) (:name (second %))) rooms)) )
                        ]
 
@@ -251,34 +251,6 @@
             ]]]]
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
      ;; [:p "mananage"]
      ;; (js/alert rooms-options)
      [fork/form {:path [:forms-add-layout]
@@ -303,7 +275,7 @@
           [:div.modal-background]
           [:div.modal-card
            [:header.modal-card-head
-            [:p.modal-card-title "Add layout"]
+            [:p.modal-card-title "Add Seating Plan"]
             [:button.delete {:aria-label "close"
                              :on-click #(do
                                           (re-frame/dispatch [:toggle-add-layout-form-status])
@@ -314,7 +286,7 @@
             [:div.grid ;;.flex.gap-4.flex-wrap ;;.overflow-auto.gap-4
              [bulma/input props
               {:name "name"
-               :label "Layout Name"
+               :label "Name"
                :type "text"
                :class ""}]
 
@@ -325,11 +297,6 @@
                :class ""
                }]
 
-             [:button.button.w-min{
-                              :on-click #(do
-                                           (re-frame/dispatch [:toggle-add-room-form-status])
-                                           (.preventDefault %))
-                              } "Add room"]
 
 
              ;; [:div.grid.grid-cols-2
@@ -350,7 +317,7 @@
              ]
             ]
            [:footer.modal-card-foot
-            [:div.buttons {:class "buttons"}
+            [:div.buttons.flex
              [:button.button.is-success {:type "submit"
                                          } "Add"]
              [:button.button {:class "button"
@@ -358,7 +325,15 @@
                                            (re-frame/dispatch [:toggle-add-layout-form-status])
                                            (.preventDefault %))}
               "Cancel"]
-             ]]
+
+             [:div.flex.justify-end [:button.button {
+                                                                     :on-click #(do
+                                                                                  (re-frame/dispatch [:toggle-add-room-form-status])
+                                                                                  (.preventDefault %))
+                                                                     } "Add room"]]
+             ]
+
+            ]
 
            ]]])]
 )
@@ -404,7 +379,7 @@
 
            [bulma/input props
             {:name "input"
-             :label "Room Name"
+             :label "Name"
              :type "text"
              :class ""}]
 
@@ -412,13 +387,13 @@
 
             [bulma/input props
              {:name "w"
-              :label "Width"
+              :label "Spaces Wide"
               :type "number"
               :class ""}]
 
             [bulma/input props
              {:name "h"
-              :label "Height"
+              :label "Spaces High"
               :type "number"
               :class ""}]
              ]

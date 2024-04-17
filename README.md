@@ -30,3 +30,6 @@ If you use this application, I would be interested in any feedback.
 3. Undo functionality
 4. Edit Class-name (add this stage you can just copy a class and rename it)
 5. Clean up code
+
+6. Improve on boarding flows
+7. No selection state in the seating plan to show where a student would be placed when added.

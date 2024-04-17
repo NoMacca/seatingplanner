@@ -231,7 +231,7 @@
      [:div.card
       [:div.card-header
 
-       [:div.card-header-title name]
+       [:div.card-header-title (str "Seating Plan: "name)]
 
        [:div.card-header-icon
         [:div.px-2
@@ -245,7 +245,7 @@
 ]
       [:div.card-footer
        ;; [:div.card-footer-item [:p.font-bold "Allocate"]]
-       [:button.card-footer-item
+       [:button.card-footer-item.bg-green-500
         {
          :title "Allocate students onto the seating plan considering the constraints"
          :on-click #(re-frame/dispatch [:organise class-id active-class-seating-plan-id])}
@@ -255,7 +255,7 @@
          ]]
 
        [:button.card-footer-item
-        {:title "Check that all students are on the seating plan"
+        {:title "Validate whether seating plan is correct"
          :on-click #(re-frame/dispatch [:validate class-id active-class-seating-plan-id])
          }
         (icons/render (icons/icon :fontawesome.solid/check) {:size 20})

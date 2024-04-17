@@ -36,7 +36,9 @@
      (for [student  (:students class)]
        ^{:key student} [student-list class-id student active-class-seating-plan-id])]
    [:button.button.rounded-full
-    {:on-click #(re-frame/dispatch [:toggle-add-student-form-status])}
+    {
+     :title "Add a student"
+     :on-click #(re-frame/dispatch [:toggle-add-student-form-status])}
     (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]
    [form/add-student class-id active-class-seating-plan-id]
    ]
@@ -74,7 +76,10 @@
        ^{:key constraint} [constraints-list class-id constraint])]
 
   [:div.py-1 [:button.button.rounded-full
-              {:on-click #(re-frame/dispatch [:toggle-add-constraint-form-status])}
+              {:on-click #(re-frame/dispatch [:toggle-add-constraint-form-status])
+               :title "Create a rule or limit on how students are assigned to the seating plan"
+
+               }
               (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]]
 
    ]
@@ -110,7 +115,10 @@
 (defn classes-list [active-class-id]
   (let [classes @(re-frame/subscribe [:classes])]
     [:div
-     [:p.menu-label "Classes"]
+     [:p.menu-label
+;; {:title "d"
+;;  }
+      "Classes"]
     [:ol.menu-list
     (for [[class-id class] classes]
       ^{:key class-id} [class-m class-id class active-class-id])
@@ -139,7 +147,8 @@
       ]
 
     [:div.py-1 [:button.button.rounded-full
-                {:on-click #(re-frame/dispatch [:toggle-add-layout-form-status])}
+                {:on-click #(re-frame/dispatch [:toggle-add-layout-form-status])
+                 :title "Create a seating plan for the selected class"}
                 (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]]
 
     [form/add-layout class-id]]
@@ -191,15 +200,7 @@
            [editor/complete-editor [:seating-plans, active-class-seating-plan-id, :layout] seating-plan
             class-id active-class-seating-plan-id
             ]])
-
-
-
         ]
-
-
-
-
-
        [:div.card
         [:div.card-header
 
