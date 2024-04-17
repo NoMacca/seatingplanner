@@ -26,7 +26,9 @@
          (icons/render (icons/icon :fontawesome.solid/plus) {:size 15})]
 
         [:button.delete.is-small ;;.order-first;.;.invisible.hover:visible
-         {:on-click #(re-frame/dispatch [:delete-student class-id student])
+         {
+          :title "Delete student"
+          :on-click #(re-frame/dispatch [:delete-student class-id student])
           }]]])
 
 (defn students [class-id class active-class-seating-plan-id]

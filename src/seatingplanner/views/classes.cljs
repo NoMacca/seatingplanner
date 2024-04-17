@@ -17,13 +17,16 @@
    [:td
     [:a.col-span-full
      {
+      :title "Create class seating plans"
       :on-click #(re-frame/dispatch [:class-id class-id])
       :href (rtfe/href :routes/#class)}
      [:button.text-blue-500.underline.hover:text-blue-700
          name]]]
    [:td (str (count students))]
    [:td [:button.delete
-         {:on-click #(re-frame/dispatch [:delete-class class-id])}
+         {
+          :title "Delete class"
+          :on-click #(re-frame/dispatch [:delete-class class-id])}
          ]]
    ])
 
@@ -43,14 +46,17 @@
            ^{:key class-id} [class-layout class-id class])]
         ]
        [:div.grid.grid-cols-3
-        [:button.button {:on-click #(re-frame/dispatch [:toggle-add-class-form-status])}
+        [:button.button {
+                         :title "Add a class"
+                         :on-click #(re-frame/dispatch [:toggle-add-class-form-status])}
          ;; "Add"
           (icons/render (icons/icon :fontawesome.solid/plus) {:size 20})
          ]]
        ]
 
       [:div.grid.rounded-xl.shadow-lg.items-center.p-6.m-4
-        [:button.button {:on-click #(re-frame/dispatch [:toggle-add-class-form-status])} "Add a Class"]]
+        [:button.button {
+                         :on-click #(re-frame/dispatch [:toggle-add-class-form-status])} "Add a Class"]]
 
       )))
 

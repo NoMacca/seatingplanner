@@ -17,18 +17,23 @@
    [:td
     [:a.col-span-full
      {
+      :title "Edit the layout of this room"
       :on-click #(re-frame/dispatch [:room-id room-id])
       :href (rtfe/href :routes/#room)}
      [:button.text-blue-500.underline.hover:text-blue-700
       name]]]
    [:td.flex.justify-end.gap-2
     [:button
-     {:on-click #(re-frame/dispatch [:toggle-on-copy-room-form-status room-id])}
+     {
+      :title "Create a copy of this room layout"
+      :on-click #(re-frame/dispatch [:toggle-on-copy-room-form-status room-id])}
           (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
      ]
 
     [:button.delete
-     {:on-click #(re-frame/dispatch [:delete-room room-id])}
+     {
+      :title "Delete this room"
+      :on-click #(re-frame/dispatch [:delete-room room-id])}
      ]
     ]
    ])

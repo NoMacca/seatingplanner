@@ -35,8 +35,13 @@
    ])
 
 (def toggle-buttons "px-3 py-2 border border-gray-300 rounded cursor-pointer")
-(def inactive " bg-gray-200 text-gray-700" )
-(def active " bg-gray-300 text-black")
+(def inactive " bg-gray-400 text-gray-700" )
+(def active " bg-gray-400 text-black")
+
+;; desk "bg-yellow-800"
+;; student "bg-yellow-100" ;;Improve the look here
+;; bg-yellow-100"
+
 
 (defn toggle-spot [path]
   (let [a @(re-frame/subscribe [:toggle-spot])]
@@ -44,23 +49,24 @@
      [:div.flex.justify-end ;;.bg-gray-200 ;;.space-x-4
       [:button {
                 :title "Student space"
-                :class (str toggle-buttons (if (= :student a) active inactive))
+                :class (str toggle-buttons (if (= :student a) " bg-yellow-100 text-black" inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot :student])}
-
-          (icons/render (icons/icon :fontawesome.solid/person) {:size 20})]
+       "Chair "
+       (icons/render (icons/icon :fontawesome.solid/chair) {:size 20})]
 
       [:button {
                 :title "Desk space"
-                :class (str toggle-buttons (if (= :desk a) active inactive))
+                :class (str toggle-buttons (if (= :desk a) " bg-yellow-800 text-black" inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot :desk])}
-          (icons/render (icons/icon :fontawesome.solid/square) {:size 20})
+       "Desk "
+       (icons/render (icons/icon :fontawesome.solid/square) {:size 20})
        ]
       [:button {
-                :title "Empty space"
-                :class (str toggle-buttons (if (= nil a) active inactive))
+                :title "Chair space"
+                :class (str toggle-buttons (if (= nil a) " bg-gray-100 text-black" inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot nil])}
-
-          (icons/render (icons/icon :fontawesome.regular/square) {:size 20})
+       "Empty "
+       (icons/render (icons/icon :fontawesome.regular/square) {:size 20})
        ]
       ;; [:button {
       ;;           :title "Undo"
@@ -72,7 +78,7 @@
       [:button {
                 :title "Clear seating plan"
                 :class (str toggle-buttons " bg-red-100") :on-click #(re-frame/dispatch [:clear-all path])}
-          (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
+       (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
        ]
 
 
@@ -87,7 +93,7 @@
 (defn cell [path row column spot-value dragging-id valid-drop-id]
       (let [
             background-color (cond
-                               (= spot-value :desk) "bg-gray-800"
+                               (= spot-value :desk) "bg-yellow-800"
                                (= spot-value :student) "bg-yellow-100" ;;Improve the look here
                                (string? spot-value) "bg-yellow-100"
                                :else "bg-gray-100")]
@@ -250,24 +256,24 @@
          :title "Allocate students onto the seating plan considering the constraints"
          :on-click #(re-frame/dispatch [:organise class-id active-class-seating-plan-id])}
         [:p
-         ;; "Allocate"
-         (icons/render (icons/icon :fontawesome.solid/chair) {:size 20})
+         "Autofill "
+         (icons/render (icons/icon :fontawesome.solid/person) {:size 20})
          ]]
 
        [:button.card-footer-item
         {:title "Validate whether seating plan is correct"
          :on-click #(re-frame/dispatch [:validate class-id active-class-seating-plan-id])
          }
+        "Validate "
         (icons/render (icons/icon :fontawesome.solid/check) {:size 20})
         ]
-
 
        [:button.card-footer-item
         {:title "Make a copy of this seating plan"
          :on-click #(re-frame/dispatch [:toggle-copy-seating-plan-form-status])
          ;; #(re-frame/dispatch [:copy-seating-plan class-id active-class-seating-plan-id])
-
          }
+        "Copy  "
         (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
         ]
        [form/copy-seating-plan class-id active-class-seating-plan-id]
@@ -279,7 +285,7 @@
          :title "Delete this seating plan"
          :on-click #(re-frame/dispatch [:delete-layout class-id active-class-seating-plan-id])}
         [:p
-         ;; "Delete"
+         "Delete "
          (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
          ]
 

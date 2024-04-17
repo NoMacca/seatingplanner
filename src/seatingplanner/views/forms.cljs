@@ -54,7 +54,7 @@
 
            [bulma/textarea props
             {:name "area"
-             :label "Students"
+             :label "Student Names"
              :type "text"
              :class "your-css-class"}]]
           [:footer.modal-card-foot
@@ -379,7 +379,7 @@
 
            [bulma/input props
             {:name "input"
-             :label "Name"
+             :label "Class Name"
              :type "text"
              :class ""}]
 
@@ -389,15 +389,16 @@
              {:name "w"
               :label "Spaces Wide"
               :type "number"
+              :placeholder "10-20"
               :class ""}]
 
             [bulma/input props
              {:name "h"
               :label "Spaces High"
+              :placeholder "10-20"
               :type "number"
               :class ""}]
              ]
-
             ]
 
 
