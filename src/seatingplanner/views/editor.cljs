@@ -88,7 +88,7 @@
                 :title "Clear space"
                 :class (str toggle-buttons (if (= nil a) " bg-gray-100 text-black" inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot nil])}
-       "Clear "
+       "Erase "
        (icons/render (icons/icon :fontawesome.regular/square) {:size 20})
        ]
       ;; [:button {
@@ -198,12 +198,10 @@
                           (reset! valid-drop-id nil)
                           ))
             }
-
            ;;EMPTY SPACE
            {
             :class (str item-class " " background-color)
             :on-click #(re-frame/dispatch [:change-cell path row column])
-
 
             :draggable "true"
             :on-drag-over (fn [event] (do

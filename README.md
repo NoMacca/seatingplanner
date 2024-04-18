@@ -30,10 +30,8 @@ If you use this application, I would be interested in any feedback.
 3. Undo functionality
 4. Edit Class-name (add this stage you can just copy a class and rename it)
 5. Clean up code
-
 6. Improve on boarding flows
 7. No selection state in the seating plan to show where a student would be placed when added.
-
 8. Have the app on one page.
 9. In the editor, make it so that apps can have columns added to the right and top. Not just the end.
 
@@ -46,9 +44,13 @@ If you use this application, I would be interested in any feedback.
 Do a check for whether there are enough seats for a seating plan
 
 
-When off grid. Delete delete the original.
-
-
+Flow for adding (Chair/Desk) 
+Click on chair or desk
+Move onto grid - a shadow showing where it will land.
+Click again to allocate the block.
+When off grid. Delete the block.
+Idea of moving multiple selected cells
+Drag and drop features
 
 TODO
 Drag and drop and a click need to be separate processes. Don't mix up.
@@ -57,11 +59,3 @@ Hover menu
 
 Look into component libraries
 
-Create a project with React Node.js -Next.js
-React & Reduct and Next
-Redux action creators
-Idepondency
-
-Work with a designer. Plenty can be don't.
-
-The grid book. New swiss typpogorphy
