@@ -408,17 +408,17 @@
   ;; (js/console.log "generate-seating-plan being run")
   (let [
         cleared-room (mapv (fn [row] (mapv (fn [item] (if (string? item) :student item)) row)) room)
+        seats (convert-room-to-seats cleared-room)
         students (cljs.core.shuffle students)          ;;variables (students)
-        csp (init (convert-room-to-seats cleared-room) ;;domains (seats)
+        csp (init seats ;;domains (seats)
                   students                             ;;variables (students)
                   (set-up-constraints constraints)
                   ;;(set (map (fn [[t s1 s2 d]] (constraint t s1 s2 d)) constraints))
                   ;; constraints
                   )
-        result (backtracking csp)
-        allocated-room (update-room-with-allocation cleared-room (:assignment result))
+        result (if (>= (count seats) (count students) )(backtracking csp) nil)
+        allocated-room (if (nil? result) cleared-room (update-room-with-allocation cleared-room (:assignment result)))
         ]
-    ;; (js/alert (str csp))
     (if (allocation? allocated-room)
       ;; true
       allocated-room
@@ -426,7 +426,7 @@
         (js/alert "Could not find an allocation with this seating plan, students and constraints. Some potential solutions are: \n1. Add some extra seats\n2. Remove some constraints\n3. Remove some students.")
         ;; (js/console.log "Hello")
         ;; false
-        allocated-room
+        room
         )
       )
     )

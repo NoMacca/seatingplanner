@@ -43,7 +43,6 @@ If you use this application, I would be interested in any feedback.
 
 Do a check for whether there are enough seats for a seating plan
 
-
 Flow for adding (Chair/Desk) 
 Click on chair or desk
 Move onto grid - a shadow showing where it will land.
