@@ -387,6 +387,17 @@
 (defn allocation? [room]
   (boolean (some string? (flatten room))))
 
+
+
+(defn vector-dimensions [vector]
+  (str
+   (apply max (map count vector))
+   "x"
+   (count vector)
+   ))
+
+
+
 ;; TODO maximum distance. teacher proximal. seating preference
 ;;==============================================
 ;; GENERATE SEATING PLAN =======================
@@ -397,9 +408,9 @@
   ;; (js/console.log "generate-seating-plan being run")
   (let [
         cleared-room (mapv (fn [row] (mapv (fn [item] (if (string? item) :student item)) row)) room)
-        students (cljs.core.shuffle students)         ;;variables (students)
+        students (cljs.core.shuffle students)          ;;variables (students)
         csp (init (convert-room-to-seats cleared-room) ;;domains (seats)
-                  students ;;variables (students)
+                  students                             ;;variables (students)
                   (set-up-constraints constraints)
                   ;;(set (map (fn [[t s1 s2 d]] (constraint t s1 s2 d)) constraints))
                   ;; constraints
@@ -407,14 +418,14 @@
         result (backtracking csp)
         allocated-room (update-room-with-allocation cleared-room (:assignment result))
         ]
-        ;; (js/alert (str csp))
+    ;; (js/alert (str csp))
     (if (allocation? allocated-room)
-;; true
+      ;; true
       allocated-room
       (do
         (js/alert "Could not find an allocation with this seating plan, students and constraints. Some potential solutions are: \n1. Add some extra seats\n2. Remove some constraints\n3. Remove some students.")
         ;; (js/console.log "Hello")
-;; false
+        ;; false
         allocated-room
         )
       )

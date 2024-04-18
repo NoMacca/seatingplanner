@@ -12,7 +12,7 @@
    [seatingplanner.stylesgarden :as gstyle]
    [seatingplanner.toolsview :as vt]))
 
-(defn room-layout [room-id {:keys [name]}]
+(defn room-layout [room-id {:keys [name layout]}]
   [:tr
    [:td
     [:a.col-span-full
@@ -22,12 +22,15 @@
       :href (rtfe/href :routes/#room)}
      [:button.text-blue-500.underline.hover:text-blue-700
       name]]]
+
+   [:td  (h/vector-dimensions layout)
+    ]
    [:td.flex.justify-end.gap-2
     [:button
      {
       :title "Create a copy of this room layout"
       :on-click #(re-frame/dispatch [:toggle-on-copy-room-form-status room-id])}
-          (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
+     (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
      ]
 
     [:button.delete
@@ -47,7 +50,7 @@
         [:thead
          [:tr
           [:td [:p.font-bold"Rooms"]]
-          ;; [:td ""]
+          [:td [:p.font-bold"Dimensions"]]
           [:td ""]
           ]]
         [:tbody

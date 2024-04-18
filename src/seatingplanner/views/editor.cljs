@@ -48,7 +48,7 @@
     [:<>
      [:div.flex.justify-end ;;.bg-gray-200 ;;.space-x-4
       [:button {
-                :title "Student space"
+                :title "Chair space"
                 :class (str toggle-buttons (if (= :student a) " bg-yellow-100 text-black" active))
                 :on-click #(re-frame/dispatch [:toggle-spot :student])}
        "Chair "
@@ -62,10 +62,10 @@
        (icons/render (icons/icon :fontawesome.solid/square) {:size 20})
        ]
       [:button {
-                :title "Chair space"
+                :title "Clear space"
                 :class (str toggle-buttons (if (= nil a) " bg-gray-100 text-black" inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot nil])}
-       "Empty "
+       "Clear "
        (icons/render (icons/icon :fontawesome.regular/square) {:size 20})
        ]
       ;; [:button {

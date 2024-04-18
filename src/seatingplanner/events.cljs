@@ -512,6 +512,9 @@ interceptors
    (get-in db [:seatingplanner :rooms id])))
 
 
+
+
+
 (re-frame/reg-event-fx
  :add-room
  interceptors
