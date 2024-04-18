@@ -736,7 +736,7 @@ interceptors
 ;; (assoc-in db path new-layout))))
 
 (re-frame/reg-event-db
- :add-column
+ :add-column-right
  interceptors
  (fn [db [_ path]]
    (let [
@@ -745,7 +745,7 @@ interceptors
      (assoc-in db path new-layout ))))
 
 (re-frame/reg-event-db
- :remove-column
+ :remove-column-right
  interceptors
  (fn [db [_ path]]
    (let [
@@ -754,7 +754,55 @@ interceptors
      (assoc-in db path new-layout ))))
 
 (re-frame/reg-event-db
- :add-row
+ :add-column-left
+ interceptors
+ (fn [db [_ path]]
+   (let [layout (get-in db path)
+         new-layout (vec (map #(conj (vec (cons nil %))) layout))]
+     (assoc-in db path new-layout))))
+
+(re-frame/reg-event-db
+ :remove-column-left
+ interceptors
+ (fn [db [_ path]]
+   (let [layout (get-in db path)
+         new-layout (vec (map (fn [[n & rest]] (vec rest)) layout))]
+     (assoc-in db path new-layout))))
+
+;; (def doo
+;; [[nil :student nil]
+;; [nil "Foo" :desk]]
+;;   )
+;; (vec (map #(conj (vec (cons nil %))) doo))
+
+;; new-layout (vec (map (fn [[n & rest]]
+;;                        (println n)
+;;                        (vec rest)) doo))
+;; (vec (map #(conj % nil) doo))
+
+(re-frame/reg-event-db
+ :add-row-top
+ interceptors
+ (fn [db [_ path]]
+   (let [layout (get-in db path)
+         new-row (-> layout
+                     first
+                     count
+                     (repeat nil)
+                     vec)
+         new-layout (conj (vec (cons new-row layout)))]
+     (assoc-in db path new-layout ))))
+
+(re-frame/reg-event-db
+ :remove-row-top
+ interceptors
+ (fn [db [_ path]]
+   (let [layout (get-in db path)
+         new-layout (vec (rest layout))]
+     (assoc-in db path new-layout ))))
+
+(re-frame/reg-event-db
+ :add-row-bottom
  interceptors
  (fn [db [_ path]]
 
@@ -769,7 +817,7 @@ interceptors
      (assoc-in db path new-layout ))))
 
 (re-frame/reg-event-db
- :remove-row
+ :remove-row-bottom
  interceptors
  (fn [db [_ path]]
    (let [

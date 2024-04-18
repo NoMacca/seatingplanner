@@ -34,13 +34,34 @@ If you use this application, I would be interested in any feedback.
 6. Improve on boarding flows
 7. No selection state in the seating plan to show where a student would be placed when added.
 
-
 8. Have the app on one page.
 9. In the editor, make it so that apps can have columns added to the right and top. Not just the end.
 
 
 ## IMPROVE UX IDEAS
 1. Include an instructional video
-2. Some instructional text
-3. Include some example rooms, classroom, and layout to help the user.
-Think about how to get people to use the app, and provide feedback. Potentially, 
+2. Include some example rooms, classroom, and layout to help the user.
+3. Think about how to get people to use the app, and provide feedback. Potentially, 
+
+Do a check for whether there are enough seats for a seating plan
+
+
+When off grid. Delete delete the original.
+
+
+
+TODO
+Drag and drop and a click need to be separate processes. Don't mix up.
+Click on it highlight. Click-> chair desk clear.
+Hover menu 
+
+Look into component libraries
+
+Create a project with React Node.js -Next.js
+React & Reduct and Next
+Redux action creators
+Idepondency
+
+Work with a designer. Plenty can be don't.
+
+The grid book. New swiss typpogorphy
