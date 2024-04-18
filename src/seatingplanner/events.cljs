@@ -50,8 +50,9 @@
  :initialize-db
  [(re-frame/inject-cofx :local-store-classes)]
  (fn [{:keys [db local-store-classes]} _]
-   ;; (js/alert (str "local-story-classes " (empty? local-store-classes)))
+   ;; (js/alert (str "db " db))
    ;; (js/alert (str "local-story-classes " local-store-classes))
+
    (if (empty? local-store-classes)
      {:db db/default-db}
      {:db
@@ -328,7 +329,7 @@ interceptors
 
 
          new-seating-plan-id (h/allocate-next-id seating-plans)
-         new-seating-plan-layout (if (= 0 room-id) [[:student :student] [:student :student]] (get-in db [:rooms, room-id :layout]))
+         new-seating-plan-layout (if (= 0 room-id) [[nil nil] [nil nil]] (get-in db [:rooms, room-id :layout]))
          new-seating-plan-name (get values "name")
          new-seating-plan {:name new-seating-plan-name, :layout new-seating-plan-layout}
          ;; ;; ADDING TO CLASS SEATING PLAN
@@ -526,7 +527,7 @@ interceptors
           (assoc-in [:forms :add-room] false)
           (assoc :rooms
                  (h/create-item rooms next-id {:name room-name
-                                               :layout (vec (repeat height (vec (repeat width :student))))
+                                               :layout (vec (repeat height (vec (repeat width nil))))
                                                })))})))
 
 (re-frame/reg-event-db

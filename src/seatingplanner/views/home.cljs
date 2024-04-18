@@ -32,7 +32,16 @@
         ]
 
        ]]]]
-   ]
+
+;; [:div
+;;  [:iframe {:width "560"
+;;            :height "560"
+;;            :src "https://www.youtube.com/embed/o2M88s9SFw4?si=3G_Sw7ZzKZhHTM-Y"
+;;            :frameborder "0"
+;;            :allowfullscreen true
+;;            :class ""}]]
+]
+;; https://github.com/micmarsh/re-frame-youtube-fx
   )
 ;; ROUTING
 (def toolbar-items

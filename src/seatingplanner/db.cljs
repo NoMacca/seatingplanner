@@ -10,9 +10,7 @@
    [tick.core :as t]))
 
 (def default-db
-
   {
-
    :seatingplanner{
                    :full-screen true
                    :forms {
@@ -23,68 +21,53 @@
                            :copy-seating-plan false
                            :add-room false
                            :copy-room false
-
                            }
-
 
                    :toggle-spot nil
                    :class-id 1
                    :classes (sorted-map
-                             ;; 1 {
-                             ;;    :name "Year 7 Digital Technology"
-                             ;;    :students ["Sally" "Jill" "James" "Jack" "John"]
-                             ;;    :constraints [[true :non-adjacent, "James", "John", 2]
-                             ;;                  [false :proximity, "Jill", "Sally", 1]]
-                             ;;    :seating-plans [{:id 2 :active true}
-                             ;;                    {:id 1 :active false}]
-                             ;;    }
-                             ;; 2 {
-                             ;;    :name "Year 10 Digital Technology"
-                             ;;    :students ["Mally" "Jill" "Eleanor" "Alan"]
-                             ;;    :constraints [[true :non-adjacent "Eleanor" "Jill" 2]]
-                             ;;    :seating-plans [{:id 3 :active true}]
-                             ;;    }
+                             1 {:name "Example Class",
+                                :students ["Luke" "Amirah" "Chen" "Alejandro" "Jane" "Sally" "Priya" "Matt" "Jamal" "Tyrone" "John" "Fatima"],
+                                :constraints [[true :non-adjacent "Alejandro" "John" 6]
+                                              [true :non-adjacent "Amirah" "Luke" 2]
+                                              [true :proximity "Chen" "Sally" 2]
+                                              [false :proximity "Matt" "Jamal" 2]],
+                                :seating-plans [{:id 1, :active true}]}
                              )
 
+
                    :seating-plans (sorted-map
-                                   ;; 1 {:name "C4 Computer Lap"
-                                   ;;    :layout [[nil :student nil]
-                                   ;;             [:student :student nil]
-                                   ;;             [nil nil "Jack"]
-                                   ;;             [:desk nil :student]]
-                                   ;;    }
-
-                                   ;; 2 {:name "B2 Science Lap"
-                                   ;;    :layout [["Sallly" :student nil]
-                                   ;;             [:student :student nil]
-                                   ;;             [nil nil "Jack"]
-                                   ;;             [:desk "Jill" :student]]
-                                   ;;    }
-
-
-                                   ;; 3 {:name "Hellow"
-                                   ;;    :layout [[:person nil "Sally"]
-                                   ;;             [nil :desk "Noah"]
-                                   ;;             ["John" "James" nil]]}
+                                   1 {:name "Example Seating Plan",
+                                      :layout [[nil nil nil nil nil nil nil nil nil nil]
+                                               [nil :desk nil :desk nil nil nil nil nil nil]
+                                               [nil "Jamal" nil "Jane" nil nil "Priya" "Fatima" nil nil]
+                                               [nil nil nil nil nil "Matt" :desk :desk "Amirah" nil]
+                                               [nil :desk nil :desk nil "Sally" :desk :desk "John" nil]
+                                               [nil "Alejandro" nil "Tyrone" nil nil "Chen" "Luke" nil nil]
+                                               [nil nil nil nil nil nil nil nil nil nil]
+                                               [nil nil nil nil nil nil nil nil nil nil]]}
                                    )
+
+
                    :room-id 1
                    :rooms (sorted-map
-                           ;; 1 {
-                           ;;    :name "3x3"
-                           ;;    :layout [
-                           ;;             [nil nil nil]
-                           ;;             [nil nil nil]
-                           ;;             [nil nil nil]]
-                           ;;    }
+                           1 {:name "Example Room",
+                              :layout [[nil nil nil nil nil nil nil nil nil nil]
+                                       [nil :desk nil :desk nil nil nil nil nil nil]
+                                       [nil :student nil :student nil nil :student :student nil nil]
+                                       [nil nil nil nil nil :student :desk :desk :student nil]
+                                       [nil :desk nil :desk nil :student :desk :desk :student nil]
+                                       [nil :student nil :student nil nil :student :student nil nil]
+                                       [nil nil nil nil nil nil nil nil nil nil]
+                                       [nil nil nil nil nil nil nil nil nil nil]]}
                            )
                    }
    })
-(type default-db)
 
-(get-in default-db [:classes 1 :seating-plans 1 :layout])
+;; (get-in default-db [:classes 1 :seating-plans 1 :layout])
 
-(s/conform even? 1)
-(s/valid? even? 12)
+;; (s/conform even? 1)
+;; (s/valid? even? 12)
 
 ;;================================
 ;; SPEC ==========================

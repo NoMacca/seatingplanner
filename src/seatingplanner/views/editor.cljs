@@ -49,7 +49,7 @@
      [:div.flex.justify-end ;;.bg-gray-200 ;;.space-x-4
       [:button {
                 :title "Student space"
-                :class (str toggle-buttons (if (= :student a) " bg-yellow-100 text-black" inactive))
+                :class (str toggle-buttons (if (= :student a) " bg-yellow-100 text-black" active))
                 :on-click #(re-frame/dispatch [:toggle-spot :student])}
        "Chair "
        (icons/render (icons/icon :fontawesome.solid/chair) {:size 20})]
