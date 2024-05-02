@@ -58,7 +58,7 @@
 
 
 (def toggle-buttons "px-3 py-2 border border-gray-300 rounded cursor-pointer")
-(def inactive " bg-gray-400 text-gray-700" )
+(def inactive " bg-gray-100 text-gray-700" )
 (def active " bg-gray-400 text-black")
 
 ;; desk "bg-yellow-800"
@@ -72,7 +72,7 @@
      [:div.flex.justify-end ;;.bg-gray-200 ;;.space-x-4
       [:button {
                 :title "Chair space"
-                :class (str toggle-buttons (if (= :student a) " bg-yellow-100 text-black" active))
+                :class (str toggle-buttons (if (= :student a) " bg-yellow-100 text-black" inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot :student])}
        "Chair "
        (icons/render (icons/icon :fontawesome.solid/chair) {:size 20})]
@@ -86,9 +86,9 @@
        ]
       [:button {
                 :title "Clear space"
-                :class (str toggle-buttons (if (= nil a) " bg-gray-100 text-black" inactive))
+                :class (str toggle-buttons (if (= nil a) " bg-gray-500 text-black" inactive))
                 :on-click #(re-frame/dispatch [:toggle-spot nil])}
-       "Erase "
+       "Clear "
        (icons/render (icons/icon :fontawesome.regular/square) {:size 20})
        ]
       ;; [:button {
@@ -100,13 +100,9 @@
       ;;  ]
       [:button {
                 :title "Clear seating plan"
-                :class (str toggle-buttons " bg-red-100") :on-click #(re-frame/dispatch [:clear-all path])}
+                :class (str toggle-buttons "bg-red-100") :on-click #(re-frame/dispatch [:clear-all path])}
        (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
        ]
-
-
-
-
       ]]))
 
 
@@ -119,7 +115,9 @@
                                (= spot-value :desk) "bg-yellow-800"
                                (= spot-value :student) "bg-yellow-100" ;;Improve the look here
                                (string? spot-value) "bg-yellow-100"
-                               :else "bg-gray-100")]
+                               :else "bg-gray-100")
+            ;; cursor-style (reagent/atom "grab")
+            ]
 
         [:div
 
@@ -131,15 +129,19 @@
            {
             :class (str item-class " " background-color)
             :on-click #(re-frame/dispatch [:change-cell path row column])
-            :style {:cursor "grab"}
+            :style {:cursor "grab"} ;;@cursor-style
 
             :draggable  "true"
 
             ;; TODO ON DRAG START
             :on-drag-start (fn [event]
-                             ;; (do (set! (.. event -target -style -cursor) "grabbing")
-                             (reset! dragging-id [row, column])
+                             (do
+                               ;; (reset! cursor-style "grabbing")
+                               ;; (set! (.. event -target -style -cursor) "grabbing")
+                               (reset! dragging-id [row, column])
                              )
+                             )
+
             ;; (reset! dragging-over-id spot-value)
 
             ;; (fn [e] (js/console.log "hello"))
@@ -182,7 +184,9 @@
 
             ;;ON DRAG
             ;; :on-drag (fn [event]
-            ;;            ;; (set! (.. event -target -style -cursor) "grabbing")
+            ;;            (do
+            ;;              (.preventDefault event)
+            ;;              (set! (.. event -target -style -cursor) "grabbing"))
             ;;            )
 
 
@@ -203,6 +207,7 @@
             :class (str item-class " " background-color)
             :on-click #(re-frame/dispatch [:change-cell path row column])
 
+            :style {:cursor "pointer"}
             :draggable "true"
             :on-drag-over (fn [event] (do
                                         (.preventDefault event)
@@ -261,65 +266,94 @@
         ]]
      ))
 
+(defn spinner []
+
+       [:svg
+        {:class "animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+         :xmlns "http://www.w3.org/2000/svg"
+         :fill "none"
+         :viewBox "0 0 24 24"}
+
+        [:circle
+         {:class "opacity-25"
+          :cx "12"
+          :cy "12"
+          :r "10"
+          :stroke "currentColor"
+          :stroke-width "4"}]
+
+        [:path
+         {:class "opacity-75"
+          :fill "currentColor"
+          :d "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"}]]
+
+  )
+
+
 
 (defn complete-editor [path named-layout class-id active-class-seating-plan-id
                        ]
   (let [
         name (:name named-layout)
-        layout (:layout named-layout)]
-     [:div.card
-      [:div.card-header
+        layout (:layout named-layout)
+        spinning? @(re-frame/subscribe [:spinner])
+        ]
+    [:div.card
+     [:div.card-header
 
-       [:div.card-header-title (str "Seating Plan: "name)]
+      [:div.card-header-title (str "Seating Plan: "name)]
 
-       [:div.card-header-icon
-        [:div.px-2
-         [:button.button.is-white
-          {:on-click #(re-frame/dispatch [:full-screen-toggle])}
-          (icons/render (icons/icon :fontawesome.solid/maximize) {:size 20})]
-         ]]]
-      [:div.card-content
+      [:div.card-header-icon
+       [:div.px-2
+        [:button.button.is-white
+         {:on-click #(re-frame/dispatch [:full-screen-toggle])}
+         (icons/render (icons/icon :fontawesome.solid/maximize) {:size 20})]
+        ]]]
+     [:div.card-content
 
-       [editor path named-layout]
-]
-      [:div.card-footer
-       ;; [:div.card-footer-item [:p.font-bold "Allocate"]]
-       [:button.card-footer-item.bg-green-500
-        {
-         :title "Allocate students onto the seating plan considering the constraints"
-         :on-click #(re-frame/dispatch [:organise class-id active-class-seating-plan-id])}
-        [:p
-         "Autofill "
-         (icons/render (icons/icon :fontawesome.solid/person) {:size 20})
-         ]]
+      [editor path named-layout]
+      ]
+     [:div.card-footer
+      ;; [:div.card-footer-item [:p.font-bold "Allocate"]]
+      [:button.card-footer-item.bg-green-300.hover:bg-green-500
 
-       [:button.card-footer-item
-        {:title "Validate whether seating plan is correct"
-         :on-click #(re-frame/dispatch [:validate class-id active-class-seating-plan-id])
-         }
-        "Validate "
-        (icons/render (icons/icon :fontawesome.solid/check) {:size 20})
+       {
+        :title "Auto fill students onto the seating plan considering the constraints"
+        :disabled spinning?
+        :on-click #(re-frame/dispatch [:organise class-id active-class-seating-plan-id])}
+       (if spinning? [spinner])
+       [:p
+        "Autofill "
+        (icons/render (icons/icon :fontawesome.solid/wand-magic-sparkles) {:size 20})
+        ]]
+
+      [:button.card-footer-item
+       {:title "Validate whether seating plan is correct"
+        :on-click #(re-frame/dispatch [:validate class-id active-class-seating-plan-id])
+        }
+       "Validate "
+       (icons/render (icons/icon :fontawesome.solid/check) {:size 20})
+       ]
+
+      [:button.card-footer-item
+       {:title "Make a copy of this seating plan"
+        :on-click #(re-frame/dispatch [:toggle-copy-seating-plan-form-status])
+        ;; #(re-frame/dispatch [:copy-seating-plan class-id active-class-seating-plan-id])
+        }
+       "Copy  "
+       (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
+       ]
+      [form/copy-seating-plan class-id active-class-seating-plan-id]
+
+
+
+      [:button.card-footer-item.bg-red-100.hover:bg-red-500
+       {
+        :title "Delete this seating plan"
+        :on-click #(re-frame/dispatch [:delete-layout class-id active-class-seating-plan-id])}
+       [:p
+        "Delete "
+        (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
         ]
 
-       [:button.card-footer-item
-        {:title "Make a copy of this seating plan"
-         :on-click #(re-frame/dispatch [:toggle-copy-seating-plan-form-status])
-         ;; #(re-frame/dispatch [:copy-seating-plan class-id active-class-seating-plan-id])
-         }
-        "Copy  "
-        (icons/render (icons/icon :fontawesome.solid/copy) {:size 20})
-        ]
-       [form/copy-seating-plan class-id active-class-seating-plan-id]
-
-
-
-       [:button.card-footer-item..bg-red-100.hover:bg-red-500
-        {
-         :title "Delete this seating plan"
-         :on-click #(re-frame/dispatch [:delete-layout class-id active-class-seating-plan-id])}
-        [:p
-         "Delete "
-         (icons/render (icons/icon :fontawesome.solid/trash) {:size 20})
-         ]
-
-        ]]]))
+       ]]]))

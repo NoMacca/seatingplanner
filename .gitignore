@@ -2,6 +2,7 @@
 /.cpcache
 /node_modules
 /resources/tw
+/resources/fontawesome-icons
 /resources/public/js/cljs-runtime
 /resources/public/js/manifest.edn
 package-lock.json

@@ -21,6 +21,7 @@
                            :copy-seating-plan false
                            :add-room false
                            :copy-room false
+                           :spinner false
                            }
 
                    :toggle-spot nil

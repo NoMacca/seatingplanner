@@ -234,6 +234,9 @@ interceptors
    ))
 
 
+
+
+
 ;;==============================
 ;; CONSTRAINTS =================
 ;;==============================
@@ -861,25 +864,35 @@ interceptors
  )
 
 ;;SELECT CLASS ===
-;;TODO redo this function
+
 (re-frame/reg-event-db
- :organise
+ :auto-fill
  interceptors
  (fn [db [_ class-id seating-plan-id]]
    (let [
          class (get-in db [:classes, class-id])
-
          students (:students class)
          constraints (:constraints class)
          layout (get-in db [:seating-plans, seating-plan-id, :layout])
          updated-room (h/generate-seating-plan layout students constraints)]
 
-;; TODO if it cannot form a allocation, it will show the followin
-     ;; [[nil :student :student] [nil :student :student] [nil nil nil]]
+      (-> db
+          (assoc-in [:forms :spinner] false)
+          (assoc-in [:seating-plans seating-plan-id, :layout] updated-room)
+     ))))
 
-     ;; (js/alert (str "class " class "students "students" constraints " constraints " layout " layout))
-     ;; (js/alert (str class_s)  "CONS "))
-     ;; (js/alert (str "room " room " students " students " constraints " con " updated room" updated-room ))
-     ;; (assoc db :class-id id))
-     (assoc-in db [:seating-plans seating-plan-id, :layout] updated-room)
-     )))
+(re-frame/reg-event-fx
+ :organise
+ interceptors
+ (fn [{:keys [db]} [_ class-id seating-plan-id]]
+   {:db (assoc-in db [:forms :spinner] true)
+    ;; :dispatch [:auto-fill class-id seating-plan-id]
+    :dispatch-later {:ms 200
+                     :dispatch [:auto-fill class-id seating-plan-id]}
+
+    }))
+
+(re-frame/reg-sub
+ :spinner
+ (fn [db _]
+   (:spinner (:forms (:seatingplanner db)))))
