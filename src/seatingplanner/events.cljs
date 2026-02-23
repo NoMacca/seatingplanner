@@ -80,12 +80,7 @@
 
    (if (empty? local-store-classes)
      {:db db/default-db}
-     {:db
-      ;; (assoc
-      ;;  db/default-db
-       local-store-classes
-       ;; )
-      }))
+     {:db (assoc-in local-store-classes [:seatingplanner :forms :spinner] false)}))
  )
 
 ;;==============================
