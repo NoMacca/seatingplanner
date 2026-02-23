@@ -44,6 +44,31 @@
 ;;                    (re-frame/path :class-timers)
 ;;                    ->local-store])
 
+;;==============================
+;; NOTIFICATIONS ================
+;;==============================
+
+(re-frame/reg-event-fx
+ :show-notification
+ (fn [{db :db} [_ message type]]
+   (let [id (inc (or (:notification-id db) 0))]
+     {:db (-> db
+              (assoc :notification {:message message :type type :id id})
+              (assoc :notification-id id))
+      :dispatch-later {:ms 5000 :dispatch [:clear-notification id]}})))
+
+(re-frame/reg-event-db
+ :clear-notification
+ (fn [db [_ id]]
+   (if (= id (get-in db [:notification :id]))
+     (dissoc db :notification)
+     db)))
+
+(re-frame/reg-sub
+ :notification
+ (fn [db _]
+   (:notification db)))
+
 ;;TODO
 ;; LOCAL STORE
 (re-frame/reg-event-fx
@@ -180,9 +205,7 @@
          ]
      ;; (js/alert (str "active-class-eating-pland-id " seating-plan ))
      (if student-exists?
-       (do
-         (js/alert (str student-name " is already in this class."))
-         {:db db})
+       {:dispatch [:show-notification (str student-name " is already in this class.") :error]}
        {:db
         (-> db
             (assoc-in [:seating-plans, active-class-seating-plan-id, :layout] (add-new-student student-name seating-plan))
@@ -196,23 +219,15 @@
   )
 
 ;;TODO check if student exists on this seating plan
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
  :student-to-seating-plan
-interceptors
- (fn [db [_ student-name active-class-seating-plan-id]]
-   (let [seating-plan (get-in db [:seating-plans, active-class-seating-plan-id, :layout])
-
-
-         ]
+ interceptors
+ (fn [{db :db} [_ student-name active-class-seating-plan-id]]
+   (let [seating-plan (get-in db [:seating-plans, active-class-seating-plan-id, :layout])]
      (if (student-not-in-seating-plan? student-name seating-plan)
-       (do
-         (js/alert (str student-name " is already in the seating plan."))
-         db)
-       (assoc-in db [:seating-plans, active-class-seating-plan-id, :layout] (add-new-student student-name seating-plan))
-       )
-     )
-   )
- )
+       {:dispatch [:show-notification (str student-name " is already in the seating plan.") :warning]}
+       {:db (assoc-in db [:seating-plans, active-class-seating-plan-id, :layout] (add-new-student student-name seating-plan))}
+     ))))
 
 
 ;; #(re-frame/dispatch [:student-to-seating-plan student active-class-seating-plan-id])
@@ -434,30 +449,19 @@ interceptors
          students (set (get-in db [:classes, class-id, :students]))
          constraints (get-in db [:classes, class-id, :constraints])
          seating-plan (get-in db [:seating-plans, active-class-seating-plan-id, :layout])
-
          students-in-seating-plan (set (filter #(string? %) (flatten seating-plan)))
          missing (clojure.set/difference students students-in-seating-plan)
-         randoms (clojure.set/difference students-in-seating-plan students)
-         constraints? (h/check-constraints? seating-plan constraints)
-
+         extras (clojure.set/difference students-in-seating-plan students)
+         constraints-met? (h/check-constraints? seating-plan constraints)
          ]
-     (js/alert (str
-                (if (empty? missing)
-                  "All students are in seating plan"
-                  (str "The following students are missing: "  (clojure.string/join ", " missing))
-                  )
-                (if (empty? randoms)
-                  ""
-                  (str "\nStudent in seating plan but no longer part of the class: "  (clojure.string/join ", " randoms))
-                  )
-                (if constraints?
-                  "\nAll the constraints are being met"
-                  "\nOne or more constraints are not being met"
-                  )))
-     {}
-     )
-   )
- )
+     {:db (assoc db :validation-result {:missing missing
+                                        :extras extras
+                                        :constraints-met? constraints-met?})})))
+
+(re-frame/reg-sub
+ :validation-result
+ (fn [db _]
+   (:validation-result (:seatingplanner db))))
 
 
 
@@ -865,21 +869,21 @@ interceptors
 
 ;;SELECT CLASS ===
 
-(re-frame/reg-event-db
+(re-frame/reg-event-fx
  :auto-fill
  interceptors
- (fn [db [_ class-id seating-plan-id]]
+ (fn [{db :db} [_ class-id seating-plan-id]]
    (let [
          class (get-in db [:classes, class-id])
          students (:students class)
          constraints (:constraints class)
          layout (get-in db [:seating-plans, seating-plan-id, :layout])
-         updated-room (h/generate-seating-plan layout students constraints)]
-
-      (-> db
-          (assoc-in [:forms :spinner] false)
-          (assoc-in [:seating-plans seating-plan-id, :layout] updated-room)
-     ))))
+         result (h/generate-seating-plan layout students constraints)]
+     (cond-> {:db (-> db
+                      (assoc-in [:forms :spinner] false)
+                      (assoc-in [:seating-plans seating-plan-id, :layout] (:layout result)))}
+       (:error result)
+       (assoc :dispatch [:show-notification (:error result) :error])))))
 
 (re-frame/reg-event-fx
  :organise

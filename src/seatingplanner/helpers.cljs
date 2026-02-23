@@ -139,36 +139,44 @@
 
 (def counter (atom 0))
 
-;; (empty? #{})
-;;
+(defn order-students
+  "Sorts students so those involved in active constraints come first.
+   This is an MRV-like heuristic — placing the most constrained students
+   first dramatically reduces backtracking.  Within each group, the order
+   is randomised so repeated Autofill runs produce different plans."
+  [students constraints]
+  (let [enabled  (filter first constraints)
+        counts   (frequencies (mapcat (fn [[_ _ s1 s2 _]] [s1 s2]) enabled))
+        with-c   (shuffle (filter #(pos? (get counts % 0)) students))
+        without-c (shuffle (remove #(pos? (get counts % 0)) students))]
+    (vec (concat with-c without-c))))
 
-
-(defn init [domains variables constraints]
-  {:domains domains
-   :variables variables
-   :any-constraints-violated? (apply some-fn constraints)
-   :assignment (zipmap variables (repeat nil))})
-
-(defn complete? [csp]
-  (every? some? (vals (:assignment csp))))
-
-(defn consistent? [{:keys [any-constraints-violated?]
-                    :as csp}]
-  (swap! counter inc)
-  (not (any-constraints-violated? csp)))
-
-(defn select-unassigned-variable [csp]
-  (first (filter (comp nil?
-                       (partial get-in csp)
-                       (partial conj [:assignment]))
-                 (:variables csp))))
-
-(defn next-csps [csp]
-  (map (fn [d]
-         (-> csp
-             (assoc-in [:assignment (select-unassigned-variable csp)] d)
-             (assoc :domains (disj (:domains csp) d ))))
-       (:domains csp)))
+(defn backtrack*
+  "Depth-first backtracking CSP solver.
+   - assignment : map of student→seat built so far
+   - remaining  : students still to place (ordered)
+   - domain     : set of unoccupied seat positions
+   - violated?  : (fn [assignment]) → true if any constraint is broken
+   Returns a complete assignment map, or nil if no solution exists."
+  [assignment remaining domain violated?]
+  (cond
+    (empty? remaining) assignment
+    :else
+    (let [student   (first remaining)
+          rest-vars (rest remaining)]
+      ;; Shuffle the available seats so each run explores a different order.
+      (loop [seats (shuffle (seq domain))]
+        (when (seq seats)
+          (let [seat           (first seats)
+                new-assignment (assoc assignment student seat)]
+            (swap! counter inc)
+            (if (violated? {:assignment new-assignment})
+              ;; Constraint broken — try the next seat
+              (recur (rest seats))
+              ;; Valid so far — recurse deeper
+              (or (backtrack* new-assignment rest-vars (disj domain seat) violated?)
+                  ;; That branch failed — try the next seat
+                  (recur (rest seats))))))))))
 
 ;; (next-csps (first (next-csps example-csp)))
 
@@ -200,13 +208,7 @@
 
 
 
-(defn backtracking-seq [csps]
-  (lazy-seq (if-let [[$first & $rest] (seq csps)]
-              (if (consistent? $first)
-                (cons $first
-                      (backtracking-seq (concat (next-csps $first)
-                                                $rest)))
-                (backtracking-seq $rest)))))
+;; backtracking-seq removed — replaced by backtrack* above
 
 
 
@@ -220,12 +222,7 @@
 
 
 
-(defn backtracking [csp]
-
-  (if-let [result (first (filter complete?
-                                 (backtracking-seq (next-csps csp))))]
-    result
-    :failure))
+;; backtracking removed — replaced by backtrack* above
 
 
 ;; (def example-csp
@@ -405,32 +402,19 @@
 
 (defn generate-seating-plan [room students constraints]
   (reset! counter 0)
-  ;; (js/console.log "generate-seating-plan being run")
-  (let [
-        cleared-room (mapv (fn [row] (mapv (fn [item] (if (string? item) :student item)) row)) room)
-        seats (convert-room-to-seats cleared-room)
-        students (cljs.core.shuffle students)          ;;variables (students)
-        csp (init seats ;;domains (seats)
-                  students                             ;;variables (students)
-                  (set-up-constraints constraints)
-                  ;;(set (map (fn [[t s1 s2 d]] (constraint t s1 s2 d)) constraints))
-                  ;; constraints
-                  )
-        result (if (>= (count seats) (count students) )(backtracking csp) nil)
-        allocated-room (if (nil? result) cleared-room (update-room-with-allocation cleared-room (:assignment result)))
-        ]
+  (let [cleared-room  (mapv (fn [row] (mapv #(if (string? %) :student %) row)) room)
+        seats         (convert-room-to-seats cleared-room)
+        ordered       (order-students students constraints)
+        violated?     (apply some-fn (set-up-constraints constraints))
+        result        (when (>= (count seats) (count students))
+                        (backtrack* {} ordered seats violated?))
+        allocated-room (if result
+                         (update-room-with-allocation cleared-room result)
+                         cleared-room)]
     (if (allocation? allocated-room)
-      ;; true
-      allocated-room
-      (do
-        (js/alert "Could not find an allocation with this seating plan, students and constraints. Some potential solutions are: \n1. Add some extra seats\n2. Remove some constraints\n3. Remove some students.")
-        ;; (js/console.log "Hello")
-        ;; false
-        room
-        )
-      )
-    )
-  )
+      {:layout allocated-room :error nil}
+      {:layout room
+       :error "Could not find an allocation. Try: adding more seats, removing some constraints, or reducing the number of students."})))
 
 ;; (defn init [domains variables constraints]
 ;;   {:domains domains

@@ -379,7 +379,7 @@
 
            [bulma/input props
             {:name "input"
-             :label "Class Name"
+             :label "Room Name"
              :type "text"
              :class ""}]
 
@@ -442,7 +442,7 @@
          [:div.modal-background]
          [:div.modal-card
           [:header.modal-card-head
-           [:p.modal-card-title "Add room"]
+           [:p.modal-card-title "Copy Room"]
            [:button.delete {:aria-label "close"
                             :on-click #(do
                                          (re-frame/dispatch [:toggle-copy-room-form-status])
@@ -452,7 +452,7 @@
 
            [bulma/input props
             {:name "input"
-             :label "Room Name"
+             :label "New Room Name"
              :type "text"
              :class ""}]
 
