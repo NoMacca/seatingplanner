@@ -61,7 +61,6 @@
    [:div {:style {:width "100%" :max-width "560px"}}
 
     [:div {:style {:text-align "center" :margin-bottom "48px"}}
-     [:img {:src "favicon.png" :alt "Learning Now" :style {:height "64px" :margin-bottom "16px"}}]
      [:h1 {:style {:font-size "2.2rem" :font-weight "700"
                    :color "#111827" :margin "0 0 10px 0"}}
       "Seating Planner"]
