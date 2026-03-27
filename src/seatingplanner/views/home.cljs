@@ -61,6 +61,7 @@
    [:div {:style {:width "100%" :max-width "560px"}}
 
     [:div {:style {:text-align "center" :margin-bottom "48px"}}
+     [:img {:src "favicon.png" :alt "Learning Now" :style {:height "64px" :margin-bottom "16px"}}]
      [:h1 {:style {:font-size "2.2rem" :font-weight "700"
                    :color "#111827" :margin "0 0 10px 0"}}
       "Seating Planner"]
@@ -115,9 +116,8 @@
                     :align-items "center"
                     :justify-content "space-between"}}
       [:a {:href  (rtfe/href :routes/#frontpage)
-           :style {:font-weight "700" :font-size "1.05rem"
-                   :color "#1d4ed8" :text-decoration "none"}}
-       "Seating Planner"]
+           :style {:text-decoration "none" :display "flex" :align-items "center"}}
+       [:img {:src "favicon.png" :alt "Learning Now" :style {:height "32px"}}]]
       [vt/navigation toolbar-items @active-route]]
 
      [show-panel @active-route]
